@@ -44,7 +44,7 @@ class BlogPage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     intro = models.CharField(max_length=250)
     body = RichTextField(blank=True)
-    authors = ParentalManyToManyField('pyviivvii.Author', blank=True)
+    authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
 
     parent_page_types = ['BlogIndexPage']
