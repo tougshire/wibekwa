@@ -1,21 +1,29 @@
 {% extends base_context_settings.base_html %}
-
+{% load static %}
 {% load wagtailcore_tags %}
 
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'wibekwa/wibekwa.css' %}">
+{% endblock %}
+
 {% block content %}
-  <div id="taggroups">
-    {% for taggroup in taggroups %}
-      {% if taggroup.pages %}
-        <div class="taggroup">
-          {% if show_tag_titles %}<h2>{{ taggroup.title }}</h2>{% endif %}
-          {% for blogpage in taggroup.pages %}
-            <p>
-                <strong><a href="{% pageurl blogpage %}">{{ blogpage.title }}</a></strong><br />
-                <small>Revised: {{ blogpage.latest_revision_created_at }}</small><br />
-            </p>
-          {% endfor %}
-        </div>
-      {% endif %}
+  <div class="pagegroups">
+    {% for page_group in page_groups %}
+      <div class="pagegroup">
+        {% for page_set in page_group.page_sets %}
+          <div class="page_set">
+            {% if show_tag_titles %}<h2>{{ page_set.title }}</h2>{% endif %}
+            <div class="pages">
+              {% for page in page_set.pages %}
+                <p>
+                    <strong><a href="{% pageurl page %}">{{ page.title }}</a></strong><br />
+                    <small>Revised: {{ page.latest_revision_created_at }}</small><br />
+                </p>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
     {% endfor %}
   </div>
 {% endblock %}

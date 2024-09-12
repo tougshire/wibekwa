@@ -33,8 +33,7 @@
     </div>
     {% endfor %}
 
-
-    <p><a href="{{ page.get_parent.url }}">Return to blog</a></p>
+    <p><a href="{{ page.get_parent.url }}">{{ page.get_parent.title }}</a></p>
 
     {% if visible_tags %}
       <div class="tags">
