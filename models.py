@@ -98,6 +98,49 @@ class BlogPageGalleryImage(Orderable):
         FieldPanel('caption'),
     ]
 
+class NonBlogPage(Page):
+    date = models.DateField("Post date", default=datetime.date.today)
+    intro = models.CharField(max_length=250)
+    body = RichTextField(blank=True)
+    authors = ParentalManyToManyField('wibekwa.Author', blank=True)
+
+    def main_image(self):
+        gallery_item = self.gallery_images.first()
+        if gallery_item:
+            return gallery_item.image
+        else:
+            return None
+
+    search_fields = Page.search_fields + [
+        index.SearchField('intro'),
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel(
+            [
+                FieldPanel('date'),
+                FieldPanel('authors', widget=forms.CheckboxSelectMultiple),
+            ],
+            heading="Blog information"
+        ),
+        FieldPanel('intro'),
+        FieldPanel('body'),
+        InlinePanel('gallery_images', label="Gallery images"),
+    ]
+
+class NonBlogPageGalleryImage(Orderable):
+    page = ParentalKey(NonBlogPage, on_delete=models.CASCADE, related_name='gallery_images')
+    image = models.ForeignKey(
+        'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
+    )
+    caption = models.CharField(blank=True, max_length=250)
+
+    panels = [
+        FieldPanel('image'),
+        FieldPanel('caption'),
+    ]
+
 @register_snippet
 class Author(models.Model):
     name = models.CharField(max_length=255)
