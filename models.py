@@ -1,4 +1,5 @@
 import datetime
+import re
 from django import forms
 from django.db import models
 
@@ -129,8 +130,7 @@ class BlogTagIndexPage(Page):
 
 class BlogTagsIndexPage(Page):
 
-    included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page")
-    grouped_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be used for separating into groups. Post must match included tags to be visible")
+    included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
     tag_titles_string = models.CharField("tags titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the BlogPages should be separated by tag")
     repeat_BlogPages = models.BooleanField(default=True, help_text="If separated by tag, if BlogPages that have multiple included tags should be repeated")
@@ -150,31 +150,42 @@ class BlogTagsIndexPage(Page):
 
     def get_context(self, request):
 
-        included_blog_tag_groups = []
+        blog_page_groups = []
 
-        included_tag_names = self.included_tag_names_string.split(',')
-        tag_titles = self.tag_titles_string.split(',')
+        included_tag_name_groups = self.included_tag_names_string.split(';')
+        tag_titles = re.split(r';|,', self.tag_titles_string )
 
-        used_tag_names=[]
+        t = 0
+        for g in range(len(included_tag_name_groups)):
+            new_blog_page_group = {'page_sets':[]}
+            page_sets = []
+            included_tag_names = included_tag_name_groups[g].split(',')
 
-        for i in range(len(included_tag_names)):
-            included_tag_name = included_tag_names[i].strip()
-            tag_title = tag_titles[i].strip() if len(tag_titles ) > i else included_tag_name
-            used_tag_names.append(included_tag_name)
-            included_blog_tag_group={}
+            for i in range(len(included_tag_names)):
+                included_tag_name = included_tag_names[i].strip()
+                new_blog_page_set={}
 
-            if not (self.repeat_BlogPages  or self.separate_tag_groups):
-                included_blog_tag_group['pages'] = BlogPage.objects.filter(tags__name=included_tag_name).exclude(tags_name__in=used_tag_names)
-            else:
-                included_blog_tag_group['pages'] = BlogPage.objects.filter(tags__name=included_tag_name)
+                new_blog_page_set['pages'] = BlogPage.objects.filter(tags__name=included_tag_name)
 
-            if included_blog_tag_group['pages']:
-                included_blog_tag_group['tagname'] = included_tag_name
-                included_blog_tag_group['title'] = tag_title
-                included_blog_tag_groups.append(included_blog_tag_group)
+                if new_blog_page_set['pages']:
+                    new_blog_page_set['tagname'] = included_tag_name
+                    tag_title = tag_titles[t].strip() if len(tag_titles ) > t else included_tag_name
+                    new_blog_page_set['title'] = tag_title
+                    page_sets.append(new_blog_page_set)
+
+                t = t + 1
+
+
+            if page_sets:
+                new_blog_page_group['page_sets']=page_sets
+
+                blog_page_groups.append(new_blog_page_group)
+
+
+
 
         context = super().get_context(request)
-        context['taggroups'] = included_blog_tag_groups
+        context['page_groups'] = blog_page_groups
         context['show_tag_titles'] = self.show_tag_titles
 
         return context
