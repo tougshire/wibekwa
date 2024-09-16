@@ -4,7 +4,7 @@ Wibekwa is a blog app for Wagtail, modified from the Wagtail tutorial
 
 ## Installation
 
-Wibekwa depends on Touglates and Wagtail ModelAdmin.  Touglates requires Markdown
+Wibekwa requires Wibekwa_base, Touglates and Wagtail ModelAdmin.  Touglates requires Markdown.
 
 These instructions are written with the assumption that you're starting a new project
 
@@ -14,9 +14,19 @@ These instructions are written with the assumption that you're starting a new pr
 * pip install [markdown](https://pypi.org/project/Markdown/)
 * pip install [wagtail_modeladmin](https://pypi.org/project/wagtail-modeladmin/)
 * git clone [https://github.com/tougshire/touglates](https://github.com/tougshire/touglates)
+* git clone [https://github.com/tougshire/wibekwa_base](https://github.com/tougshire/wibekwa_base)
 * git clone [https://github.com/tougshire/wibekwa](https://github.com/tougshire/wibekwa)
-* add "wagtail.contrib.settings", to your installed apps (for neatness, add it below "wagtail.admin")
+* add "wagtail.contrib.settings" and "wagtail_modeladmin" to your installed apps (for neatness, add them below "wagtail.admin")
 * add "touglates" and "wibekwa" to your installed apps
+* add "touglates.context_processors.base_context_settings" to the list of context_processors under TEMPLATES in base.py
+* add the following in base.py:
+    * you can also write your own template base app and use that instead of wibekwa_base
+
+            BASE_CONTEXT_SETTINGS = {
+                'base_html':"base.html",
+                'wibekwa_base': 'wibekwa_base',
+            }
+
 * run the migrations again
 * Continue with the tutorial at the section Blog index and posts
 
