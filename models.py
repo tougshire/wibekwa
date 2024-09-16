@@ -9,7 +9,12 @@ from taggit.models import TaggedItemBase
 
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
-from wagtail.admin.panels import FieldPanel, InlinePanel, MultiFieldPanel
+from wagtail.admin.panels import (
+    FieldPanel,
+    InlinePanel,
+    MultiFieldPanel,
+    PageChooserPanel,
+)
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 from wagtail.contrib.settings.models import (
@@ -18,6 +23,29 @@ from wagtail.contrib.settings.models import (
     register_setting,
 )
 
+
+
+class RedirectPage(Page):
+
+    target_page = models.ForeignKey(
+        'wagtailcore.Page',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',
+    )
+
+    content_panels = Page.content_panels + [
+        PageChooserPanel('target_page'),
+    ]
+
+    def route(self, request, path_components):
+        if path_components:
+            return super().route(request, path_components)
+        else:
+            print('tp202499611', self.target_page.slug)
+            path_components=[self.target_page.slug]
+            return super().route(request, path_components)
 
 class BlogIndexPage(Page):
     intro = RichTextField(blank=True)
