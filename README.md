@@ -4,7 +4,7 @@ Wibekwa is a blog app for Wagtail, modified from the Wagtail tutorial
 
 ## Installation
 
-Wibekwa requires Wibekwa_base, Touglates and Wagtail ModelAdmin.  Touglates requires Markdown.
+Wibekwa requires wibekwa_base, touglates and wagtail_modeladmin.  Touglates requires markdown. If you're using a different template app than wibekwa_base, you can substitute that app
 
 These instructions are written with the assumption that you're starting a new project
 
@@ -17,9 +17,9 @@ These instructions are written with the assumption that you're starting a new pr
 * git clone [https://github.com/tougshire/wibekwa_base](https://github.com/tougshire/wibekwa_base)
 * git clone [https://github.com/tougshire/wibekwa](https://github.com/tougshire/wibekwa)
 * add "wagtail.contrib.settings" and "wagtail_modeladmin" to your installed apps (for neatness, add them below "wagtail.admin")
-* add "touglates" and "wibekwa" to your installed apps
-* add "touglates.context_processors.base_context_settings" to the list of context_processors under TEMPLATES in base.py
-* add the following in base.py:
+* add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS in settings/base.py
+* add "touglates.context_processors.base_context_settings" to the list of context_processors under TEMPLATES in settings/base.py
+* add the following in settings/base.py:
     * you can also write your own template base app and use that instead of wibekwa_base
 
             BASE_CONTEXT_SETTINGS = {
@@ -28,9 +28,23 @@ These instructions are written with the assumption that you're starting a new pr
             }
 
 * run the migrations again
-* Continue with the tutorial at the section Blog index and posts
 
+## Usage
 
+### Wibekwa provides the ability to have a landing page other than the root page.  Webekwa also provides for a static tags index page, where you designate the included tags in the admin panel.  The following instructions are a way to make use of those features
 
-
-
+* In the admin panel, change the home page name from "Home" to "Z Home" and the slug from "home" to "z-home"
+* from the root page, (http://127.0.0.1:8000/admin/pages/ if your site is http://127.0.0.1:8000), create a new blog index page
+    * name it "blog"
+    * check the "for site menus" check box under the Promote tab
+* from the root page, create a new static tags index page
+    * name it "featured posts"
+    * under "tags included" enter "featured"
+* from the root page, create a new redirect page
+    * name it "Home"
+    * for the target page, choose the featured posts page
+* go to http://127.0.0.1:8000/admin/sites (subbing whatever your actual base url is)
+* edit localhost and change the root page from Z_Home to Home
+* go back to http://127.0.0.1:8000/admin/pages/ and move the featured posts page and the blog page under home
+    * Do this by selecting the three dots, then "move", then the three dots, then "choose a different page"
+* You can now add new posts with the "Blog Pages" menu item.  If you tag the post with "featured", it will show up on your home page
