@@ -199,7 +199,7 @@ class BlogTagIndexPage(Page):
         context['BlogPages'] = BlogPages
         return context
 
-class BlogTagsIndexPage(Page):
+class BlogStaticTagsIndexPage(Page):
 
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
     tag_titles_string = models.CharField("tags titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
