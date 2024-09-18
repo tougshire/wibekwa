@@ -71,7 +71,7 @@ class BlogPageTag(TaggedItemBase):
 
 class BlogPage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
-    intro = models.CharField(max_length=250)
+    summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True)
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
@@ -96,7 +96,7 @@ class BlogPage(Page):
             return None
 
     search_fields = Page.search_fields + [
-        index.SearchField('intro'),
+        index.SearchField('summary'),
         index.SearchField('body'),
     ]
 
@@ -109,7 +109,7 @@ class BlogPage(Page):
             ],
             heading="Blog information"
         ),
-        FieldPanel('intro'),
+        FieldPanel('summary'),
         FieldPanel('body'),
         InlinePanel('gallery_images', label="Gallery images"),
     ]
@@ -128,7 +128,7 @@ class BlogPageGalleryImage(Orderable):
 
 class NonBlogPage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
-    intro = models.CharField(max_length=250)
+    summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True)
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
 
@@ -140,7 +140,7 @@ class NonBlogPage(Page):
             return None
 
     search_fields = Page.search_fields + [
-        index.SearchField('intro'),
+        index.SearchField('summary'),
         index.SearchField('body'),
     ]
 
@@ -152,7 +152,7 @@ class NonBlogPage(Page):
             ],
             heading="Blog information"
         ),
-        FieldPanel('intro'),
+        FieldPanel('summary'),
         FieldPanel('body'),
         InlinePanel('gallery_images', label="Gallery images"),
     ]
@@ -201,16 +201,20 @@ class BlogTagIndexPage(Page):
 
 class BlogStaticTagsIndexPage(Page):
 
+    top_tag = models.CharField("tags included as top", max_length=30, blank=True, help_text="A tag to be included in which the posts of this tag are specially featured")
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
+    top_tag_title = models.CharField("top tag title", max_length=30, blank=True, help_text="The title for the top tag")
     tag_titles_string = models.CharField("tags titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the BlogPages should be separated by tag")
     repeat_BlogPages = models.BooleanField(default=True, help_text="If separated by tag, if BlogPages that have multiple included tags should be repeated")
     show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the BlogPages')
 
     content_panels = Page.content_panels + [
+        FieldPanel('top_tag'),
         FieldPanel('included_tag_names_string'),
         MultiFieldPanel(
             [
+                FieldPanel('top_tag_title'),
                 FieldPanel('tag_titles_string'),
                 FieldPanel('separate_tag_groups'),
                 FieldPanel('repeat_BlogPages'),
@@ -220,6 +224,10 @@ class BlogStaticTagsIndexPage(Page):
     ]
 
     def get_context(self, request):
+
+        top_page_group = {}
+        top_page_group['pages'] = BlogPage.objects.filter(tags__name=self.top_tag)
+        top_page_group['title'] = self.top_tag_title
 
         blog_page_groups = []
 
@@ -252,10 +260,8 @@ class BlogStaticTagsIndexPage(Page):
 
                 blog_page_groups.append(new_blog_page_group)
 
-
-
-
         context = super().get_context(request)
+        context['top_page_group'] = top_page_group
         context['page_groups'] = blog_page_groups
         context['show_tag_titles'] = self.show_tag_titles
 
