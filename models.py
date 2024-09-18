@@ -225,44 +225,44 @@ class BlogStaticTagsIndexPage(Page):
 
     def get_context(self, request):
 
-        top_page_group = {}
-        top_page_group['pages'] = BlogPage.objects.filter(tags__name=self.top_tag)
-        top_page_group['title'] = self.top_tag_title
+        top_article_group = {}
+        top_article_group['pages'] = BlogPage.objects.filter(tags__name=self.top_tag)
+        top_article_group['title'] = self.top_tag_title
 
-        blog_page_groups = []
+        article_groups = []
 
         included_tag_name_groups = self.included_tag_names_string.split(';')
         tag_titles = re.split(r';|,', self.tag_titles_string )
 
         t = 0
         for g in range(len(included_tag_name_groups)):
-            new_blog_page_group = {'page_sets':[]}
-            page_sets = []
+            new_article_group = {'article_sets':[]}
+            article_sets = []
             included_tag_names = included_tag_name_groups[g].split(',')
 
             for i in range(len(included_tag_names)):
                 included_tag_name = included_tag_names[i].strip()
-                new_blog_page_set={}
+                new_article_set={}
 
-                new_blog_page_set['pages'] = BlogPage.objects.filter(tags__name=included_tag_name)
+                new_article_set['pages'] = BlogPage.objects.filter(tags__name=included_tag_name)
 
-                if new_blog_page_set['pages']:
-                    new_blog_page_set['tagname'] = included_tag_name
+                if new_article_set['pages']:
+                    new_article_set['tagname'] = included_tag_name
                     tag_title = tag_titles[t].strip() if len(tag_titles ) > t else included_tag_name
-                    new_blog_page_set['title'] = tag_title
-                    page_sets.append(new_blog_page_set)
+                    new_article_set['title'] = tag_title
+                    article_sets.append(new_article_set)
 
                 t = t + 1
 
 
-            if page_sets:
-                new_blog_page_group['page_sets']=page_sets
+            if article_sets:
+                new_article_group['article_sets']=article_sets
 
-                blog_page_groups.append(new_blog_page_group)
+                article_groups.append(new_article_group)
 
         context = super().get_context(request)
-        context['top_page_group'] = top_page_group
-        context['page_groups'] = blog_page_groups
+        context['top_article_group'] = top_article_group
+        context['article_groups'] = article_groups
         context['show_tag_titles'] = self.show_tag_titles
 
         return context
