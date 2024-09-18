@@ -38,13 +38,13 @@ These instructions are written with the assumption that you're starting a new pr
     * name it "blog"
     * check the "for site menus" check box under the Promote tab
 * from the root page, create a new static tags index page
-    * name it "featured posts"
+    * name it "featured articles"
     * under "tags included" enter "featured"
 * from the root page, create a new redirect page
     * name it "Home"
-    * for the target page, choose the featured posts page
+    * for the target page, choose the featured articles page
 * go to http://127.0.0.1:8000/admin/sites (subbing whatever your actual base url is)
 * edit localhost and change the root page from Z_Home to Home
-* go back to http://127.0.0.1:8000/admin/pages/ and move the featured posts page and the blog page under home
+* go back to http://127.0.0.1:8000/admin/pages/ and move the featured articles page and the blog page under home
     * Do this by selecting the three dots, then "move", then the three dots, then "choose a different page"
-* You can now add new posts with the "Blog Pages" menu item.  If you tag the post with "featured", it will show up on your home page
+* You can now add new articles with the "Blog Pages" menu item.  If you tag the article with "featured", it will show up on your home page

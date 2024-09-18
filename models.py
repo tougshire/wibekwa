@@ -43,11 +43,10 @@ class RedirectPage(Page):
         if path_components:
             return super().route(request, path_components)
         else:
-            print('tp202499611', self.target_page.slug)
             path_components=[self.target_page.slug]
             return super().route(request, path_components)
 
-class BlogIndexPage(Page):
+class ArticleIndexPage(Page):
     intro = RichTextField(blank=True)
 
     content_panels = Page.content_panels + [
@@ -56,27 +55,27 @@ class BlogIndexPage(Page):
 
     def get_context(self, request):
         context = super().get_context(request)
-        BlogPages = self.get_children().live().order_by('-first_published_at')
-        context['blogpages'] = BlogPages
+        ArticlePages = self.get_children().live().order_by('-first_published_at')
+        context['articepages'] = ArticlePages
         return context
 
 @register_snippet
-class BlogPageTag(TaggedItemBase):
+class ArticlePageTag(TaggedItemBase):
     content_object = ParentalKey(
-        'BlogPage',
+        'ArticlePage',
         related_name='tagged_items',
         on_delete=models.CASCADE
     )
-    hide_from_lists = models.BooleanField('hide from lists', default=False, help_text="if this tag should be hidden from the list of tags in an BlogPage's meta section and similar locations")
+    hide_from_lists = models.BooleanField('hide from lists', default=False, help_text="if this tag should be hidden from the list of tags in an ArticlePage's meta section and similar locations")
 
-class BlogPage(Page):
+class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True)
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
-    tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
+    tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
-    parent_page_types = ['BlogIndexPage']
+    parent_page_types = ['ArticleIndexPage']
 
     def get_context(self, request):
         context=super().get_context(request)
@@ -114,8 +113,8 @@ class BlogPage(Page):
         InlinePanel('gallery_images', label="Gallery images"),
     ]
 
-class BlogPageGalleryImage(Orderable):
-    page = ParentalKey(BlogPage, on_delete=models.CASCADE, related_name='gallery_images')
+class ArticlePageGalleryImage(Orderable):
+    page = ParentalKey(ArticlePage, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ForeignKey(
         'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
     )
@@ -188,26 +187,26 @@ class Author(models.Model):
     class Meta:
         verbose_name_plural = 'Authors'
 
-class BlogTagIndexPage(Page):
+class ArticleTagIndexPage(Page):
 
     def get_context(self, request):
 
         tag = request.GET.get('tag')
-        BlogPages = BlogPage.objects.filter(tags__name=tag)
+        ArticlePages = ArticlePage.objects.filter(tags__name=tag)
 
         context = super().get_context(request)
-        context['BlogPages'] = BlogPages
+        context['ArticlePages'] = ArticlePages
         return context
 
-class BlogStaticTagsIndexPage(Page):
+class ArticleStaticTagsIndexPage(Page):
 
-    top_tag = models.CharField("tags included as top", max_length=30, blank=True, help_text="A tag to be included in which the posts of this tag are specially featured")
+    top_tag = models.CharField("tags included as top", max_length=30, blank=True, help_text="A tag to be included in which the articles of this tag are specially featured")
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
     top_tag_title = models.CharField("top tag title", max_length=30, blank=True, help_text="The title for the top tag")
     tag_titles_string = models.CharField("tags titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
-    separate_tag_groups = models.BooleanField(default=True, help_text="If the BlogPages should be separated by tag")
-    repeat_BlogPages = models.BooleanField(default=True, help_text="If separated by tag, if BlogPages that have multiple included tags should be repeated")
-    show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the BlogPages')
+    separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
+    repeat_ArticlePages = models.BooleanField(default=True, help_text="If separated by tag, if ArticlePages that have multiple included tags should be repeated")
+    show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the ArticlePages')
 
     content_panels = Page.content_panels + [
         FieldPanel('top_tag'),
@@ -217,7 +216,7 @@ class BlogStaticTagsIndexPage(Page):
                 FieldPanel('top_tag_title'),
                 FieldPanel('tag_titles_string'),
                 FieldPanel('separate_tag_groups'),
-                FieldPanel('repeat_BlogPages'),
+                FieldPanel('repeat_ArticlePages'),
                 FieldPanel('show_tag_titles')
             ]
         )
@@ -225,54 +224,55 @@ class BlogStaticTagsIndexPage(Page):
 
     def get_context(self, request):
 
-        top_article_group = {}
-        top_article_group['pages'] = BlogPage.objects.filter(tags__name=self.top_tag)
-        top_article_group['title'] = self.top_tag_title
+        top_article_page_group = {}
+        top_article_page_group['article_pages'] = ArticlePage.objects.filter(tags__name=self.top_tag)
+        top_article_page_group['title'] = self.top_tag_title
 
-        article_groups = []
+        article_page_groups = []
 
         included_tag_name_groups = self.included_tag_names_string.split(';')
         tag_titles = re.split(r';|,', self.tag_titles_string )
 
         t = 0
         for g in range(len(included_tag_name_groups)):
-            new_article_group = {'article_sets':[]}
-            article_sets = []
+            new_article_page_group = {'article_page_sets':[]}
+            article_page_sets = []
             included_tag_names = included_tag_name_groups[g].split(',')
 
             for i in range(len(included_tag_names)):
+                print('tp249se23', included_tag_names[i])
                 included_tag_name = included_tag_names[i].strip()
-                new_article_set={}
+                new_article_page_set={}
 
-                new_article_set['pages'] = BlogPage.objects.filter(tags__name=included_tag_name)
+                new_article_page_set['article_pages'] = ArticlePage.objects.filter(tags__name=included_tag_name)
 
-                if new_article_set['pages']:
-                    new_article_set['tagname'] = included_tag_name
+                if new_article_page_set['article_pages']:
+                    new_article_page_set['tagname'] = included_tag_name
                     tag_title = tag_titles[t].strip() if len(tag_titles ) > t else included_tag_name
-                    new_article_set['title'] = tag_title
-                    article_sets.append(new_article_set)
+                    new_article_page_set['title'] = tag_title
+                    article_page_sets.append(new_article_page_set)
 
                 t = t + 1
 
 
-            if article_sets:
-                new_article_group['article_sets']=article_sets
+            if article_page_sets:
+                new_article_page_group['article_page_sets']=article_page_sets
 
-                article_groups.append(new_article_group)
+                article_page_groups.append(new_article_page_group)
 
         context = super().get_context(request)
-        context['top_article_group'] = top_article_group
-        context['article_groups'] = article_groups
+        context['top_article_page_group'] = top_article_page_group
+        context['article_page_groups'] = article_page_groups
         context['show_tag_titles'] = self.show_tag_titles
 
         return context
 
 @register_setting
 class SiteSpecificImportantPages(BaseSiteSetting):
-    blog_index_page = models.ForeignKey(
+    article_index_page = models.ForeignKey(
         'wagtailcore.Page', null=True, on_delete=models.SET_NULL, related_name='+'
     )
 
     panels = [
-        FieldPanel('blog_index_page'),
+        FieldPanel('article_index_page'),
     ]
