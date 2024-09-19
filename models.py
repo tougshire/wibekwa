@@ -200,20 +200,18 @@ class ArticleTagIndexPage(Page):
 
 class ArticleStaticTagsIndexPage(Page):
 
-    top_tag = models.CharField("tags included as top", max_length=30, blank=True, help_text="A tag to be included in which the articles of this tag are specially featured")
+
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
-    top_tag_title = models.CharField("top tag title", max_length=30, blank=True, help_text="The title for the top tag")
-    tag_titles_string = models.CharField("tags titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
+    tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
     repeat_ArticlePages = models.BooleanField(default=True, help_text="If separated by tag, if ArticlePages that have multiple included tags should be repeated")
     show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the ArticlePages')
 
     content_panels = Page.content_panels + [
-        FieldPanel('top_tag'),
+
         FieldPanel('included_tag_names_string'),
         MultiFieldPanel(
             [
-                FieldPanel('top_tag_title'),
                 FieldPanel('tag_titles_string'),
                 FieldPanel('separate_tag_groups'),
                 FieldPanel('repeat_ArticlePages'),
@@ -224,14 +222,12 @@ class ArticleStaticTagsIndexPage(Page):
 
     def get_context(self, request):
 
-        top_article_page_group = {}
-        top_article_page_group['article_pages'] = ArticlePage.objects.filter(tags__name=self.top_tag)
-        top_article_page_group['title'] = self.top_tag_title
 
         article_page_groups = []
 
         included_tag_name_groups = self.included_tag_names_string.split(';')
-        tag_titles = re.split(r';|,', self.tag_titles_string )
+        tag_titles = re.split(r';|,', self.tag_titles_string ) if self.tag_titles_string > '' else []
+        print('tp249jd31', tag_titles)
 
         t = 0
         for g in range(len(included_tag_name_groups)):
@@ -240,7 +236,6 @@ class ArticleStaticTagsIndexPage(Page):
             included_tag_names = included_tag_name_groups[g].split(',')
 
             for i in range(len(included_tag_names)):
-                print('tp249se23', included_tag_names[i])
                 included_tag_name = included_tag_names[i].strip()
                 new_article_page_set={}
 
@@ -261,7 +256,6 @@ class ArticleStaticTagsIndexPage(Page):
                 article_page_groups.append(new_article_page_group)
 
         context = super().get_context(request)
-        context['top_article_page_group'] = top_article_page_group
         context['article_page_groups'] = article_page_groups
         context['show_tag_titles'] = self.show_tag_titles
 
