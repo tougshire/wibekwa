@@ -2,7 +2,7 @@ from django import template
 
 from wagtail.models import Site
 
-from wibekwa_base.models import TemplateSettings
+from wibekwa.models import TemplateSettings
 
 register = template.Library()
 
