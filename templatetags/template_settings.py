@@ -17,7 +17,7 @@ def get_template_settings(context):
             "show_leftbar": instance.show_leftbar,
             "show_rightbar": instance.show_rightbar,
             "mainmenu_location": instance.mainmenu_location,
-            "theme_color": instance.themecolor,
+            "theme_color": instance.theme_color,
         } if instance else {
             "show_leftbar": False,
             "show_rightbar": False,
