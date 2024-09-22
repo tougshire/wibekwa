@@ -46,8 +46,10 @@ class RedirectPage(Page):
 
 class ArticleIndexPage(Page):
     intro = RichTextField(blank=True)
+    show_pagetitle=models.BooleanField( default=True, help_text="If the page title should be shown" )
 
     content_panels = Page.content_panels + [
+        FieldPanel('show_pagetitle'),
         FieldPanel('intro')
     ]
 
@@ -69,7 +71,7 @@ class ArticlePageTag(TaggedItemBase):
 class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
-    body = RichTextField(blank=True)
+    body = RichTextField(blank=True,)
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
@@ -198,9 +200,10 @@ class ArticleTagIndexPage(Page):
 
 class ArticleStaticTagsIndexPage(Page):
 
-
+    show_pagetitle=models.BooleanField( default=True, help_text="If the page title should be shown" )
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
-    tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
+    tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names - not separated by group")
+    group_titles_string = models.CharField("group titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used for tag groups")
     first_group_is_special = models.BooleanField("first group is special", default=False, help_text="If the first group is expected to be treated differetly from the others.  Implementation may vary by template app")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
     repeat_ArticlePages = models.BooleanField(default=True, help_text="If separated by tag, if ArticlePages that have multiple included tags should be repeated")
@@ -208,10 +211,13 @@ class ArticleStaticTagsIndexPage(Page):
 
     content_panels = Page.content_panels + [
 
-        FieldPanel('included_tag_names_string'),
+
+        FieldPanel('show_pagetitle'),
         MultiFieldPanel(
             [
+                FieldPanel('included_tag_names_string'),
                 FieldPanel('tag_titles_string'),
+                FieldPanel('group_titles_string'),
                 FieldPanel('first_group_is_special'),
                 FieldPanel('separate_tag_groups'),
                 FieldPanel('repeat_ArticlePages'),
@@ -227,10 +233,14 @@ class ArticleStaticTagsIndexPage(Page):
 
         included_tag_name_groups = self.included_tag_names_string.split(';')
         tag_titles = re.split(r';|,', self.tag_titles_string ) if self.tag_titles_string > '' else []
-
+        group_titles = re.split(r';|,', self.group_titles_string ) if self.group_titles_string > '' else []
+        print('tp249m929', group_titles)
         t = 0
         for g in range(len(included_tag_name_groups)):
             new_article_page_group = {'article_page_sets':[]}
+            if len(group_titles) > g:
+                if group_titles[g] > '':
+                    new_article_page_group['group_title'] = group_titles[g]
             article_page_sets = []
             included_tag_names = included_tag_name_groups[g].split(',')
 
@@ -271,19 +281,17 @@ class SiteSpecificImportantPages(BaseSiteSetting):
         FieldPanel('article_index_page'),
     ]
 
-@register_snippet
-class TemplateSettings(models.Model):
+@register_setting
+class SiteTemplateSettings(BaseSiteSetting):
 
     show_leftbar=models.BooleanField(
         default=False,
         help_text="If the left sidebar should be shown - requires a template named wibewa/includes/sidebarleft.html"
     )
-
     show_rightbar=models.BooleanField(
         default=False,
         help_text="If the right sidebar should be shown - requires a template named wibewa/includes/sidebarright.html"
     )
-
     mainmenu_location=models.CharField(
         "main menu location",
         max_length=20,
@@ -294,12 +302,13 @@ class TemplateSettings(models.Model):
     theme_color=models.CharField(
         "theme color",
         max_length=30,
-        default="blue",
-        help_text='The theme color. This should match the base name of a css file in a static folder wibekwa/css'
+        default="black",
+        help_text='The theme color. This should match the base name of a css file in a static folder wibekwa/css. Ex "blue" if there is a wibekwa/css/blue.css'
     )
 
     def __str__(self):
-        return "Template Settings"
+        return "Template Settings for " + self.site.__str__() if self.site is not None else "None"
 
     class Meta():
         verbose_name_plural = "Template Settings"
+
