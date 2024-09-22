@@ -270,3 +270,36 @@ class SiteSpecificImportantPages(BaseSiteSetting):
     panels = [
         FieldPanel('article_index_page'),
     ]
+
+@register_snippet
+class TemplateSettings(models.Model):
+
+    show_leftbar=models.BooleanField(
+        default=False,
+        help_text="If the left sidebar should be shown - requires a template named wibewa/includes/sidebarleft.html"
+    )
+
+    show_rightbar=models.BooleanField(
+        default=False,
+        help_text="If the right sidebar should be shown - requires a template named wibewa/includes/sidebarright.html"
+    )
+
+    mainmenu_location=models.CharField(
+        "main menu location",
+        max_length=20,
+        choices=(("none","None"),("top","Top"),("left","Left"),("right","Right")),
+        help_text="The location of the main menu",
+        default="top"
+    )
+    theme_color=models.CharField(
+        "theme color",
+        max_length=30,
+        default="blue",
+        help_text='The theme color. This should match the base name of a css file in a static folder wibekwa/css'
+    )
+
+    def __str__(self):
+        return "Template Settings"
+
+    class Meta():
+        verbose_name_plural = "Template Settings"
