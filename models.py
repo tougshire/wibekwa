@@ -23,8 +23,6 @@ from wagtail.contrib.settings.models import (
     register_setting,
 )
 
-
-
 class RedirectPage(Page):
 
     target_page = models.ForeignKey(
@@ -203,6 +201,7 @@ class ArticleStaticTagsIndexPage(Page):
 
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
     tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names")
+    first_group_is_special = models.BooleanField("first group is special", default=False, help_text="If the first group is expected to be treated differetly from the others.  Implementation may vary by template app")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
     repeat_ArticlePages = models.BooleanField(default=True, help_text="If separated by tag, if ArticlePages that have multiple included tags should be repeated")
     show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the ArticlePages')
@@ -213,6 +212,7 @@ class ArticleStaticTagsIndexPage(Page):
         MultiFieldPanel(
             [
                 FieldPanel('tag_titles_string'),
+                FieldPanel('first_group_is_special'),
                 FieldPanel('separate_tag_groups'),
                 FieldPanel('repeat_ArticlePages'),
                 FieldPanel('show_tag_titles')
@@ -227,7 +227,6 @@ class ArticleStaticTagsIndexPage(Page):
 
         included_tag_name_groups = self.included_tag_names_string.split(';')
         tag_titles = re.split(r';|,', self.tag_titles_string ) if self.tag_titles_string > '' else []
-        print('tp249jd31', tag_titles)
 
         t = 0
         for g in range(len(included_tag_name_groups)):
@@ -258,6 +257,7 @@ class ArticleStaticTagsIndexPage(Page):
         context = super().get_context(request)
         context['article_page_groups'] = article_page_groups
         context['show_tag_titles'] = self.show_tag_titles
+        context['first_group_is_special'] = self.first_group_is_special
 
         return context
 
