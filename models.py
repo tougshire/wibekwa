@@ -292,6 +292,7 @@ class SiteTemplateSettings(BaseSiteSetting):
     banner_image = models.ForeignKey(
         'wagtailimages.Image', related_name='+',
         null=True,
+        default=None,
         on_delete=models.SET_NULL
     )
     show_banner_image = models.BooleanField(
@@ -309,12 +310,14 @@ class SiteTemplateSettings(BaseSiteSetting):
         "banner_text",
         max_length=80,
         blank=True,
+        default="Wibekwa",
         help_text="The alt text to be displayed if there is a banner image, or the text to be displayed if there is no image"
     )
     site_description=models.CharField(
         "site description",
         max_length=80,
         blank=True,
+        default="New Wibewa Wagtail Blog",
         help_text="The site description to be displayed near the banner image or banner text"
     )
     show_leftbar=models.BooleanField(
@@ -342,6 +345,7 @@ class SiteTemplateSettings(BaseSiteSetting):
         "footer text",
         max_length=255,
         blank=True,
+        default="Created wth Wagtail and Wibekwa",
         help_text="The footer text.  This may be split into a list using footer_text_separator",
     )
     footer_text_separator=models.CharField(
