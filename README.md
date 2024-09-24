@@ -33,13 +33,13 @@ These instructions are written with the assumption that you're starting a new pr
 
 ### Wibekwa provides the ability to have a landing page other than the root page.  Webekwa also provides for a static tags index page, where you designate the included tags in the admin panel.  The following instructions are a way to make use of those features
 
-* In the admin panel, change the home page name from "Home" to "Z Home" and the slug from "home" to "z-home"
-* from the root page, (http://127.0.0.1:8000/admin/pages/ if your site is http://127.0.0.1:8000), create a new blog index page
-    * name it "blog"
-    * check the "for site menus" check box under the Promote tab
-* from the root page, create a new static tags index page
+* In the admin panel, delete the default page that Wagtail created
+* from the root page, (http://127.0.0.1:8000/admin/pages/ if your site is http://127.0.0.1:8000), create a new static tags index page
     * name it "featured articles"
     * under "tags included" enter "featured"
+* from the root page, create a new blog index page
+    * name it "blog"
+    * check the "for site menus" check box under the Promote tab
 * from the root page, create a new redirect page
     * name it "Home"
     * for the target page, choose the featured articles page
