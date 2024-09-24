@@ -12,26 +12,49 @@ def get_site_root(context):
 
 @register.simple_tag(takes_context=True)
 def get_template_settings(context):
-
     template_settings = context.get("template_settings", "")
 
+    template_settings_keys = [
+            "banner_image",
+            "show_banner_image",
+            "banner_image_style",
+            "banner_text",
+            "site_description",
+            "show_leftbar",
+            "show_rightbar",
+            "mainmenu_location",
+            "theme_color",
+            "footer_text",
+            "footer_text_separator",
+    ]
+    template_settings_defaults = {
+        "banner_image": None,
+    }
     if not template_settings:
-        template_settings = { #defaults
-            "show_leftbar": False,
-            "show_rightbar": False,
-            "mainmenu_location": "top",
-            "theme_color": "black",
-        }
+        template_settings = {}
+
         instance = SiteTemplateSettings.objects.filter(site=Site.find_for_request(context["request"])).first()
         if not instance:
             instance = SiteTemplateSettings.objects.filter(site=None).first()
+
         if instance:
-            template_settings = {
-                "show_leftbar": instance.show_leftbar,
-                "show_rightbar": instance.show_rightbar,
-                "mainmenu_location": instance.mainmenu_location,
-                "theme_color": instance.theme_color,
-            }
+            for key in template_settings_keys:
+                template_settings[key] = getattr(instance, key)
+
+        else:
+            for key in template_settings_keys:
+                try:
+                    template_settings[key] = SiteTemplateSettings._meta.get_field(key).default
+                except:
+                    template_settings[key] = template_settings_defaults[key]
+
+        if template_settings["footer_text_separator"]:
+            template_settings["footer_text"] = template_settings["footer_text"].split(template_settings["footer_text_separator"])
+
+        if not ';' in template_settings["banner_image_style"]:
+            template_settings["banner_image_width"] = template_settings["banner_image_style"]
+            template_settings["banner_image_style"] = ""
+
 
         return template_settings
 

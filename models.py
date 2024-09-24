@@ -11,10 +11,15 @@ from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
 from wagtail.admin.panels import (
     FieldPanel,
+    FieldRowPanel,
     InlinePanel,
     MultiFieldPanel,
     PageChooserPanel,
+
 )
+from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.panels import FormSubmissionsPanel
+
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 from wagtail.contrib.settings.models import (
@@ -192,7 +197,7 @@ class ArticleTagIndexPage(Page):
     def get_context(self, request):
 
         tag = request.GET.get('tag')
-        ArticlePages = ArticlePage.objects.filter(tags__name=tag)
+        ArticlePages = ArticlePage.objects.live().filter(tags__name=tag)
 
         context = super().get_context(request)
         context['ArticlePages'] = ArticlePages
@@ -234,7 +239,7 @@ class ArticleStaticTagsIndexPage(Page):
         included_tag_name_groups = self.included_tag_names_string.split(';')
         tag_titles = re.split(r';|,', self.tag_titles_string ) if self.tag_titles_string > '' else []
         group_titles = re.split(r';|,', self.group_titles_string ) if self.group_titles_string > '' else []
-        print('tp249m929', group_titles)
+
         t = 0
         for g in range(len(included_tag_name_groups)):
             new_article_page_group = {'article_page_sets':[]}
@@ -248,7 +253,7 @@ class ArticleStaticTagsIndexPage(Page):
                 included_tag_name = included_tag_names[i].strip()
                 new_article_page_set={}
 
-                new_article_page_set['article_pages'] = ArticlePage.objects.filter(tags__name=included_tag_name)
+                new_article_page_set['article_pages'] = ArticlePage.objects.live().filter(tags__name=included_tag_name)
 
                 if new_article_page_set['article_pages']:
                     new_article_page_set['tagname'] = included_tag_name
@@ -284,6 +289,34 @@ class SiteSpecificImportantPages(BaseSiteSetting):
 @register_setting
 class SiteTemplateSettings(BaseSiteSetting):
 
+    banner_image = models.ForeignKey(
+        'wagtailimages.Image', related_name='+',
+        null=True,
+        on_delete=models.SET_NULL
+    )
+    show_banner_image = models.BooleanField(
+        'show banner image',
+        default=True,
+        help_text="Show the chosen banner image.  If deselected, banner_text will be used instead of the image"
+    )
+    banner_image_style = models.CharField(
+        max_length=255,
+        blank=True,
+        default="50%",
+        help_text="Styling for the banner image or if a single value, A css value representing the width of the banner image. Include at least one semicolon (;) to indicate that this is a style, and not just a width value"
+    )
+    banner_text = models.CharField(
+        "banner_text",
+        max_length=80,
+        blank=True,
+        help_text="The alt text to be displayed if there is a banner image, or the text to be displayed if there is no image"
+    )
+    site_description=models.CharField(
+        "site description",
+        max_length=80,
+        blank=True,
+        help_text="The site description to be displayed near the banner image or banner text"
+    )
     show_leftbar=models.BooleanField(
         default=False,
         help_text="If the left sidebar should be shown - requires a template named wibewa/includes/sidebarleft.html"
@@ -305,6 +338,19 @@ class SiteTemplateSettings(BaseSiteSetting):
         default="black",
         help_text='The theme color. This should match the base name of a css file in a static folder wibekwa/css. Ex "blue" if there is a wibekwa/css/blue.css'
     )
+    footer_text=models.CharField(
+        "footer text",
+        max_length=255,
+        blank=True,
+        help_text="The footer text.  This may be split into a list using footer_text_separator",
+    )
+    footer_text_separator=models.CharField(
+        "footer text separator",
+        max_length=2,
+        blank=True,
+        default=';',
+        help_text="The character by which the footer text will be split into a list.  This is optional"
+    )
 
     def __str__(self):
         return "Template Settings for " + self.site.__str__() if self.site is not None else "None"
@@ -312,3 +358,23 @@ class SiteTemplateSettings(BaseSiteSetting):
     class Meta():
         verbose_name_plural = "Template Settings"
 
+class FormField(AbstractFormField):
+    page = ParentalKey('FormPage', on_delete=models.CASCADE, related_name='form_fields')
+
+class FormPage(AbstractEmailForm):
+    intro = RichTextField(blank=True)
+    thank_you_text = RichTextField(blank=True)
+
+    content_panels = AbstractEmailForm.content_panels + [
+        FormSubmissionsPanel(),
+        FieldPanel('intro'),
+        InlinePanel('form_fields', label="Form fields"),
+        FieldPanel('thank_you_text'),
+        MultiFieldPanel([
+            FieldRowPanel([
+                FieldPanel('from_address'),
+                FieldPanel('to_address'),
+            ]),
+            FieldPanel('subject'),
+        ], "Email"),
+    ]
