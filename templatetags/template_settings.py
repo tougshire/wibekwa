@@ -14,7 +14,7 @@ def get_site_root(context):
 def get_template_settings(context):
     template_settings = context.get("template_settings", "")
 
-    template_settings_keys = [
+    template_settings_keys = {
             "banner_image",
             "show_banner_image",
             "banner_image_style",
@@ -26,9 +26,6 @@ def get_template_settings(context):
             "theme_color",
             "footer_text",
             "footer_text_separator",
-    ]
-    template_settings_defaults = {
-        "banner_image": None,
     }
     if not template_settings:
         template_settings = {}
@@ -43,10 +40,7 @@ def get_template_settings(context):
 
         else:
             for key in template_settings_keys:
-                try:
-                    template_settings[key] = SiteTemplateSettings._meta.get_field(key).default
-                except:
-                    template_settings[key] = template_settings_defaults[key]
+                template_settings[key] = SiteTemplateSettings._meta.get_field(key).default
 
         if template_settings["footer_text_separator"] and template_settings["footer_text"]:
             template_settings["footer_text"] = template_settings["footer_text"].split(template_settings["footer_text_separator"])
