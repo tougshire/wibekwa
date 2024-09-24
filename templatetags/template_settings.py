@@ -48,7 +48,7 @@ def get_template_settings(context):
                 except:
                     template_settings[key] = template_settings_defaults[key]
 
-        if template_settings["footer_text_separator"]:
+        if template_settings["footer_text_separator"] and template_settings["footer_text_separator"]:
             template_settings["footer_text"] = template_settings["footer_text"].split(template_settings["footer_text_separator"])
 
         if not ';' in template_settings["banner_image_style"]:
