@@ -18,14 +18,6 @@ These instructions are written with the assumption that you're starting a new pr
 * git clone [https://github.com/tougshire/wibekwa](https://github.com/tougshire/wibekwa)
 * add "wagtail.contrib.settings" and "wagtail_modeladmin" to your installed apps (for neatness, add them below "wagtail.admin")
 * add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS in settings/base.py
-* add "touglates.context_processors.base_context_settings" to the list of context_processors under TEMPLATES in settings/base.py
-* add the following in settings/base.py:
-    * you can also write your own template base app and use that instead of wibekwa_base
-
-            BASE_CONTEXT_SETTINGS = {
-                'base_html':"base.html",
-                'wibekwa_base': 'wibekwa_base',
-            }
 
 * run the migrations again
 
