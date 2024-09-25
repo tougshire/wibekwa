@@ -65,6 +65,23 @@ class ArticleIndexPage(Page):
         context['articepages'] = ArticlePages
         return context
 
+class SidebarPage(Page):
+    intro = RichTextField(blank=True)
+    show_pagetitle=models.BooleanField( default=True, help_text="If the page title should be shown" )
+    location = models.CharField("location", max_length=40, blank=True, choices=(("left","left"),("right","right"),("top","top"),("bottom","bottom")))
+
+    content_panels = Page.content_panels + [
+        FieldPanel('show_pagetitle'),
+        FieldPanel('intro'),
+        FieldPanel('location')
+    ]
+
+    def get_context(self, request):
+        context = super().get_context(request)
+        ArticlePages = self.get_children().live().order_by('-first_published_at')
+        context['articepages'] = ArticlePages
+        return context
+
 @register_snippet
 class ArticlePageTag(TaggedItemBase):
     content_object = ParentalKey(
@@ -73,7 +90,7 @@ class ArticlePageTag(TaggedItemBase):
         on_delete=models.CASCADE
     )
 
-class AbstractArticlePage(Page):
+class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True,)
@@ -82,6 +99,8 @@ class AbstractArticlePage(Page):
 
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
+
+    parent_page_types = ["ArticleIndexPage"]
 
     def get_context(self, request):
         context=super().get_context(request)
@@ -94,9 +113,7 @@ class AbstractArticlePage(Page):
         allow_embed = False
         if self.embed_url:
             if hasattr(settings,"ALLOWED_EMBED_URLS"):
-                print('tp249p926', self.embed_url)
                 for allowed_url in settings.ALLOWED_EMBED_URLS:
-                    print('tp249p927', allowed_url)
                     if allowed_url in self.embed_url[0:len(allowed_url)]:
                         allow_embed = True
             else:
@@ -105,7 +122,6 @@ class AbstractArticlePage(Page):
             if allow_embed:
                 context['embed_url'] = self.embed_url
                 context['embed_frame_style'] = self.embed_frame_style
-
 
         return context
 
@@ -129,7 +145,7 @@ class AbstractArticlePage(Page):
                 FieldPanel('authors', widget=forms.CheckboxSelectMultiple),
                 FieldPanel('tags'),
             ],
-            heading="Blog information"
+            heading="Article information"
         ),
         FieldPanel('summary'),
         FieldPanel('body'),
@@ -144,12 +160,105 @@ class AbstractArticlePage(Page):
 
     ]
 
-class ArticlePage(AbstractArticlePage):
-    parent_page_types = ['ArticleIndexPage']
+class FreeArticlePage(Page):
+
+    body = RichTextField(blank=True,)
+    embed_url = models.URLField("Embed Target URL", blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
+
+    def get_context(self, request):
+        context=super().get_context(request)
+
+        # restrict allowable embeds by listing them in settings.  "https://tougshire.com/12345" will match if "https://tougshire.com" is listed
+        allow_embed = False
+        if self.embed_url:
+            if hasattr(settings,"ALLOWED_EMBED_URLS"):
+                for allowed_url in settings.ALLOWED_EMBED_URLS:
+                    if allowed_url in self.embed_url[0:len(allowed_url)]:
+                        allow_embed = True
+            else:
+                allow_embed = True
+
+            if allow_embed:
+                context['embed_url'] = self.embed_url
+                context['embed_frame_style'] = self.embed_frame_style
+
+        return context
+
+
+    def main_image(self):
+        gallery_item = self.gallery_images.first()
+        if gallery_item:
+            return gallery_item.image
+        else:
+            return None
+
+    search_fields = Page.search_fields + [
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+
+        FieldPanel('body'),
+        MultiFieldPanel(
+            [
+                FieldPanel('embed_url'),
+                FieldPanel('embed_frame_style'),
+            ],
+            heading="Embedded Content"
+        ),
+
+    ]
+
+
+class SidebarArticlePage(Page):
+
+    body = RichTextField(blank=True,)
+    embed_url = models.URLField("Embed Target URL", blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
+
+    parent_page_types = ["SidebarPage"]
+
+    def get_context(self, request):
+        context=super().get_context(request)
+
+        # restrict allowable embeds by listing them in settings.  "https://tougshire.com/12345" will match if "https://tougshire.com" is listed
+        allow_embed = False
+        if self.embed_url:
+            if hasattr(settings,"ALLOWED_EMBED_URLS"):
+                for allowed_url in settings.ALLOWED_EMBED_URLS:
+                    if allowed_url in self.embed_url[0:len(allowed_url)]:
+                        allow_embed = True
+            else:
+                allow_embed = True
+
+            if allow_embed:
+                context['embed_url'] = self.embed_url
+                context['embed_frame_style'] = self.embed_frame_style
+
+        return context
+
+    search_fields = Page.search_fields + [
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+
+        FieldPanel('body'),
+        MultiFieldPanel(
+            [
+                FieldPanel('embed_url'),
+                FieldPanel('embed_frame_style'),
+            ],
+            heading="Embedded Content"
+        ),
+
+    ]
+
 
 class ArticlePageGalleryImage(Orderable):
     page = ParentalKey(
-        AbstractArticlePage, on_delete=models.CASCADE, related_name='gallery_images')
+        ArticlePage, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ForeignKey(
         'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
     )
@@ -159,10 +268,6 @@ class ArticlePageGalleryImage(Orderable):
         FieldPanel('image'),
         FieldPanel('caption'),
     ]
-
-# An article page not restricted to a parent
-class FreeArticlePage(AbstractArticlePage):
-    pass
 
 
 @register_snippet
