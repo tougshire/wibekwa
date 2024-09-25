@@ -382,3 +382,14 @@ class FormPage(AbstractEmailForm):
             FieldPanel('subject'),
         ], "Email"),
     ]
+
+class EmbedPage(Page):
+    intro = RichTextField(blank=True)
+    target_url = models.URLField("Target URL", help_text="The URL of the embedded contnet")
+    framestyle = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="Styling for the frame")
+
+    content_panels = AbstractEmailForm.content_panels + [
+        FieldPanel('intro'),
+        FieldPanel('target_url'),
+        FieldPanel('framestyle')
+    ]

@@ -33,18 +33,24 @@ These instructions are written with the assumption that you're starting a new pr
 
 ### Wibekwa provides the ability to have a landing page other than the root page.  Webekwa also provides for a static tags index page, where you designate the included tags in the admin panel.  The following instructions are a way to make use of those features
 
-* In the admin panel, delete the default page that Wagtail created
-* from the root page, (http://127.0.0.1:8000/admin/pages/ if your site is http://127.0.0.1:8000), create a new static tags index page
+* rename the automatically-created page
+    * In the admin panel, click "Pages", then the edit icon (a pencil) for "Wecome to your new Wagtail site!"
+    * In the promote tab, rename the slug from "home" to "old-home"
+    * Publish the page
+* using the "add child page" action next to the word "Root", create a new article index page
+    * name it "articles"
+    * check the "for site menus" check box under the Promote tab
+    * Publish the page
+* from the root page, create a new article static tags index page
     * name it "featured articles"
     * under "tags included" enter "featured"
-* from the root page, create a new blog index page
-    * name it "blog"
-    * check the "for site menus" check box under the Promote tab
+    * Publish the page
 * from the root page, create a new redirect page
     * name it "Home"
     * for the target page, choose the featured articles page
-* go to http://127.0.0.1:8000/admin/sites (subbing whatever your actual base url is)
-* edit localhost and change the root page from Z_Home to Home
-* go back to http://127.0.0.1:8000/admin/pages/ and move the featured articles page and the blog page under home
-    * Do this by selecting the three dots, then "move", then the three dots, then "choose a different page"
+    * Publish the page
+* Move the featured articles page and the articles index page under the home page
+    * Do this each page from the page list by selecting the three dots next to the page title, then "move".  After moving each page, get back to the page list by clicking "Pages", then "Pages" next to the home icon
+* Click "Settings" then "Sites"
+* edit localhost and change the root page from the old home page to the new home page (which is the redirect page)
 * You can now add new articles with the "Blog Pages" menu item.  If you tag the article with "featured", it will show up on your home page
