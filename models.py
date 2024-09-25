@@ -2,6 +2,7 @@ import datetime
 import re
 from django import forms
 from django.db import models
+from django.conf import settings
 
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.contrib.taggit import ClusterTaggableManager
@@ -77,6 +78,9 @@ class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True,)
+    embed_url = models.URLField("Embed Target URL", blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
+
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
@@ -88,6 +92,23 @@ class ArticlePage(Page):
         for tag in context['page'].tags.all():
             if not tag.name[0] == '_':
                 context['visible_tags'].append(tag.name)
+
+        # restrict allowable embeds by listing them in settings.  "https://tougshire.com/12345" will match if "https://tougshire.com" is listed
+        allow_embed = False
+        if self.embed_url:
+            if hasattr(settings,"ALLOWED_EMBED_URLS"):
+                print('tp249p926', self.embed_url)
+                for allowed_url in settings.ALLOWED_EMBED_URLS:
+                    print('tp249p927', allowed_url)
+                    if allowed_url in self.embed_url[0:len(allowed_url)]:
+                        allow_embed = True
+            else:
+                allow_embed = True
+
+            if allow_embed:
+                context['embed_url'] = self.embed_url
+                context['embed_frame_style'] = self.embed_frame_style
+
 
         return context
 
@@ -116,6 +137,14 @@ class ArticlePage(Page):
         FieldPanel('summary'),
         FieldPanel('body'),
         InlinePanel('gallery_images', label="Gallery images"),
+        MultiFieldPanel(
+            [
+                FieldPanel('embed_url'),
+                FieldPanel('embed_frame_style'),
+            ],
+            heading="Embedded Content"
+        ),
+
     ]
 
 class ArticlePageGalleryImage(Orderable):
@@ -384,13 +413,3 @@ class FormPage(AbstractEmailForm):
         ], "Email"),
     ]
 
-class EmbedPage(Page):
-    intro = RichTextField(blank=True)
-    target_url = models.URLField("Target URL", help_text="The URL of the embedded contnet")
-    framestyle = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="Styling for the frame")
-
-    content_panels = AbstractEmailForm.content_panels + [
-        FieldPanel('intro'),
-        FieldPanel('target_url'),
-        FieldPanel('framestyle')
-    ]
