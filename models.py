@@ -292,6 +292,7 @@ class SiteTemplateSettings(BaseSiteSetting):
     banner_image = models.ForeignKey(
         'wagtailimages.Image', related_name='+',
         null=True,
+        blank=True,
         default=None,
         on_delete=models.SET_NULL
     )
