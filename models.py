@@ -63,6 +63,17 @@ class ArticleIndexPage(Page):
         context = super().get_context(request)
         ArticlePages = self.get_children().live().order_by('-first_published_at')
         context['articepages'] = ArticlePages
+
+        sidebars = []
+        for sidebarpage in SidebarPage.objects.live().all():
+            sidebar = {"location":sidebarpage.location, "children":[]}
+            for childpage in sidebarpage.get_children():
+                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
+
+                sidebar["children"].append(child)
+            sidebars.append(sidebar)
+        context['sidebars'] = sidebars
+
         return context
 
 class SidebarPage(Page):
@@ -79,7 +90,7 @@ class SidebarPage(Page):
     def get_context(self, request):
         context = super().get_context(request)
         ArticlePages = self.get_children().live().order_by('-first_published_at')
-        context['articepages'] = ArticlePages
+        context['articlepages'] = ArticlePages
         return context
 
 @register_snippet
@@ -94,7 +105,7 @@ class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True,)
-    embed_url = models.URLField("Embed Target URL", blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
 
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
@@ -163,7 +174,7 @@ class ArticlePage(Page):
 class FreeArticlePage(Page):
 
     body = RichTextField(blank=True,)
-    embed_url = models.URLField("Embed Target URL", blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_url = models.URLField("Embed Target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
 
     def get_context(self, request):
@@ -214,7 +225,7 @@ class FreeArticlePage(Page):
 class SidebarArticlePage(Page):
 
     body = RichTextField(blank=True,)
-    embed_url = models.URLField("Embed Target URL", blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_url = models.URLField("Embed Target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
 
     parent_page_types = ["SidebarPage"]
@@ -330,6 +341,7 @@ class ArticleStaticTagsIndexPage(Page):
 
     def get_context(self, request):
 
+        context = super().get_context(request)
 
         article_page_groups = []
 
@@ -366,7 +378,17 @@ class ArticleStaticTagsIndexPage(Page):
 
                 article_page_groups.append(new_article_page_group)
 
-        context = super().get_context(request)
+
+        sidebars = []
+        for sidebarpage in SidebarPage.objects.live().all():
+            sidebar = {"location":sidebarpage.location, "children":[]}
+            for childpage in sidebarpage.get_children():
+                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
+
+                sidebar["children"].append(child)
+            sidebars.append(sidebar)
+        context['sidebars'] = sidebars
+
         context['article_page_groups'] = article_page_groups
         context['show_tag_titles'] = self.show_tag_titles
         context['first_group_is_special'] = self.first_group_is_special
