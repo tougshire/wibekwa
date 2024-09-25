@@ -72,7 +72,6 @@ class ArticlePageTag(TaggedItemBase):
         related_name='tagged_items',
         on_delete=models.CASCADE
     )
-    hide_from_lists = models.BooleanField('hide from lists', default=False, help_text="if this tag should be hidden from the list of tags in an ArticlePage's meta section and similar locations")
 
 class AbstractArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
