@@ -74,7 +74,7 @@ class ArticlePageTag(TaggedItemBase):
     )
     hide_from_lists = models.BooleanField('hide from lists', default=False, help_text="if this tag should be hidden from the list of tags in an ArticlePage's meta section and similar locations")
 
-class ArticlePage(Page):
+class AbstractArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
     body = RichTextField(blank=True,)
@@ -83,8 +83,6 @@ class ArticlePage(Page):
 
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
-
-    parent_page_types = ['ArticleIndexPage']
 
     def get_context(self, request):
         context=super().get_context(request)
@@ -147,8 +145,12 @@ class ArticlePage(Page):
 
     ]
 
+class ArticlePage(AbstractArticlePage):
+    parent_page_types = ['ArticleIndexPage']
+
 class ArticlePageGalleryImage(Orderable):
-    page = ParentalKey(ArticlePage, on_delete=models.CASCADE, related_name='gallery_images')
+    page = ParentalKey(
+        AbstractArticlePage, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ForeignKey(
         'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
     )
@@ -159,48 +161,10 @@ class ArticlePageGalleryImage(Orderable):
         FieldPanel('caption'),
     ]
 
-class NonBlogPage(Page):
-    date = models.DateField("Post date", default=datetime.date.today)
-    summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
-    body = RichTextField(blank=True)
-    authors = ParentalManyToManyField('wibekwa.Author', blank=True)
+# An article page not restricted to a parent
+class FreeArticlePage(AbstractArticlePage):
+    pass
 
-    def main_image(self):
-        gallery_item = self.gallery_images.first()
-        if gallery_item:
-            return gallery_item.image
-        else:
-            return None
-
-    search_fields = Page.search_fields + [
-        index.SearchField('summary'),
-        index.SearchField('body'),
-    ]
-
-    content_panels = Page.content_panels + [
-        MultiFieldPanel(
-            [
-                FieldPanel('date'),
-                FieldPanel('authors', widget=forms.CheckboxSelectMultiple),
-            ],
-            heading="Blog information"
-        ),
-        FieldPanel('summary'),
-        FieldPanel('body'),
-        InlinePanel('gallery_images', label="Gallery images"),
-    ]
-
-class NonBlogPageGalleryImage(Orderable):
-    page = ParentalKey(NonBlogPage, on_delete=models.CASCADE, related_name='gallery_images')
-    image = models.ForeignKey(
-        'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
-    )
-    caption = models.CharField(blank=True, max_length=250)
-
-    panels = [
-        FieldPanel('image'),
-        FieldPanel('caption'),
-    ]
 
 @register_snippet
 class Author(models.Model):
