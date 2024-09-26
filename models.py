@@ -61,9 +61,18 @@ class ArticleIndexPage(Page):
     ]
 
     def get_context(self, request):
+
+        tag = request.GET.get('tag')
+        print('tp249q709', tag)
+
         context = super().get_context(request)
         ArticlePages = self.get_children().live().order_by('-first_published_at')
-        context['articepages'] = ArticlePages
+        if tag:
+            ArticlePages = ArticlePage.objects.filter(tags__name=tag)
+        for article_page in ArticlePages:
+            print('tp249q729', article_page)
+
+        context['articlepages'] = ArticlePages
 
         sidebars = []
         for sidebarpage in SidebarPage.objects.live().all():
@@ -119,8 +128,9 @@ class ArticlePage(Page):
         context=super().get_context(request)
         context['visible_tags']=[]
         for tag in context['page'].tags.all():
+
             if not tag.name[0] == '_':
-                context['visible_tags'].append(tag.name)
+                context['visible_tags'].append(tag)
 
         # restrict allowable embeds by listing them in settings.  "https://tougshire.com/12345" will match if "https://tougshire.com" is listed
         allow_embed = False
@@ -135,6 +145,16 @@ class ArticlePage(Page):
             if allow_embed:
                 context['embed_url'] = self.embed_url
                 context['embed_frame_style'] = self.embed_frame_style
+
+        sidebars = []
+        for sidebarpage in SidebarPage.objects.live().all():
+            sidebar = {"location":sidebarpage.location, "children":[]}
+            for childpage in sidebarpage.get_children():
+                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
+
+                sidebar["children"].append(child)
+            sidebars.append(sidebar)
+        context['sidebars'] = sidebars
 
         return context
 
@@ -202,6 +222,19 @@ class FreeArticlePage(Page):
             if allow_embed:
                 context['embed_url'] = self.embed_url
                 context['embed_frame_style'] = self.embed_frame_style
+
+        sidebars = []
+        for sidebarpage in SidebarPage.objects.live().all():
+            sidebar = {"location":sidebarpage.location, "children":[]}
+            for childpage in sidebarpage.get_children():
+                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
+
+                sidebar["children"].append(child)
+            sidebars.append(sidebar)
+        context['sidebars'] = sidebars
+
+        return context
+
 
         return context
 
@@ -309,16 +342,16 @@ class Author(models.Model):
     class Meta:
         verbose_name_plural = 'Authors'
 
-class ArticleTagIndexPage(Page):
+# class ArticleTagIndexPage(Page):
 
-    def get_context(self, request):
+#     def get_context(self, request):
 
-        tag = request.GET.get('tag')
-        ArticlePages = ArticlePage.objects.live().filter(tags__name=tag)
+#         tag = request.GET.get('tag')
+#         ArticlePages = ArticlePage.objects.live().filter(tags__name=tag)
 
-        context = super().get_context(request)
-        context['ArticlePages'] = ArticlePages
-        return context
+#         context = super().get_context(request)
+#         context['ArticlePages'] = ArticlePages
+#         return context
 
 class ArticleStaticTagsIndexPage(Page):
 
@@ -416,6 +449,13 @@ class SiteSpecificImportantPages(BaseSiteSetting):
 
 @register_setting
 class SiteTemplateSettings(BaseSiteSetting):
+
+    header_style = models.CharField(
+        max_length=255,
+        blank=True,
+        default="50%",
+        help_text="Inline styling for the header",
+    )
 
     banner_image = models.ForeignKey(
         'wagtailimages.Image', related_name='+',
