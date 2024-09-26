@@ -15,6 +15,7 @@ def get_template_settings(context):
     template_settings = context.get("template_settings", "")
 
     template_settings_keys = {
+            "header_style",
             "banner_image",
             "show_banner_image",
             "banner_image_style",
