@@ -3,10 +3,11 @@ import re
 from django import forms
 from django.db import models
 from django.conf import settings
-
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
+
+from wagtail.documents import get_document_model
 
 from wagtail.models import Page, Orderable
 from wagtail.fields import RichTextField
@@ -107,7 +108,8 @@ class ArticlePage(Page):
     body = RichTextField(blank=True,)
     embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
-
+    document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
+    show_doc_link = models.BooleanField("show doc link", default=True, help_text="Show the document link automatically.  One reason to set false would be you're already placing a link in the body")
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
@@ -160,6 +162,13 @@ class ArticlePage(Page):
         ),
         FieldPanel('summary'),
         FieldPanel('body'),
+        MultiFieldPanel(
+            [
+                FieldPanel('document'),
+                FieldPanel('show_doc_link'),
+            ],
+            heading="Document"
+        ),
         InlinePanel('gallery_images', label="Gallery images"),
         MultiFieldPanel(
             [
