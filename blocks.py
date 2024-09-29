@@ -8,10 +8,10 @@ from wagtail.blocks import (
     StructBlock,
     URLBlock
 )
+from wagtail.contrib.table_block.blocks import TableBlock
 from wagtail.documents.blocks import DocumentChooserBlock
 from wagtail.embeds.blocks import EmbedBlock
 from wagtail.images.blocks import ImageChooserBlock
-
 
 class DocumentBlock(StructBlock):
     document = DocumentChooserBlock(required=True),
@@ -55,6 +55,7 @@ class HeadingBlock(StructBlock):
         template = "wibekwa/blocks/heading_block.html"
 
 
+
 class BaseStreamBlock(StreamBlock):
     paragraph_block = RichTextBlock(icon="pilcrow", features=["link","bold","italic","ol","ul"])
     heading_block = HeadingBlock()
@@ -65,6 +66,7 @@ class BaseStreamBlock(StreamBlock):
         help_text="Insert a URL to embed. For example, https://www.youtube.com/watch?v=SGJFWirQ3ks",
         icon="media",
     )
+    table = TableBlock()
 
 class BodyStreamBlock(BaseStreamBlock):
     pass
