@@ -68,7 +68,6 @@ class ArticleIndexPage(Page):
     def get_context(self, request):
 
         tag = request.GET.get('tag')
-        print('tp249q709', tag)
 
         context = super().get_context(request)
         ArticlePages = self.get_children().live().order_by('-first_published_at')
@@ -119,7 +118,6 @@ class ArticlePageTag(TaggedItemBase):
 class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
-    body = RichTextField(blank=True)
     body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True)
     embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
@@ -174,7 +172,7 @@ class ArticlePage(Page):
 
     search_fields = Page.search_fields + [
         index.SearchField('summary'),
-        index.SearchField('body'),
+        index.SearchField('body_sf'),
     ]
 
     content_panels = Page.content_panels + [
@@ -189,11 +187,9 @@ class ArticlePage(Page):
         FieldPanel('summary'),
         MultiFieldPanel(
             [
-                FieldPanel('body'),
                 FieldPanel('body_sf'),
             ],
             heading="Body",
-            help_text = "!! In near future, body will be eliminated and body_sf will be renamed to 'body'"
         ),
         MultiFieldPanel(
             [
@@ -215,7 +211,7 @@ class ArticlePage(Page):
 
 class FreeArticlePage(Page):
 
-    body = RichTextField(blank=True,)
+    body = StreamField(BodyStreamBlock(), blank=True, use_json_field=True)
     embed_url = models.URLField("Embed Target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
 
