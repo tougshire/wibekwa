@@ -7,10 +7,6 @@ from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.contrib.taggit import ClusterTaggableManager
 from taggit.models import TaggedItemBase
 
-from wagtail.documents import get_document_model
-
-from wagtail.models import Page, Orderable
-from wagtail.fields import RichTextField
 from wagtail.admin.panels import (
     FieldPanel,
     FieldRowPanel,
@@ -19,16 +15,25 @@ from wagtail.admin.panels import (
     PageChooserPanel,
 
 )
+
 from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
 from wagtail.contrib.forms.panels import FormSubmissionsPanel
 
-from wagtail.search import index
-from wagtail.snippets.models import register_snippet
 from wagtail.contrib.settings.models import (
     BaseGenericSetting,
     BaseSiteSetting,
     register_setting,
 )
+
+from wagtail.fields import StreamField, RichTextField
+from wagtail.documents import get_document_model
+
+from wagtail.models import Page, Orderable
+
+from wagtail.search import index
+from wagtail.snippets.models import register_snippet
+
+from .blocks import BodyStreamBlock
 
 class RedirectPage(Page):
 
@@ -114,7 +119,8 @@ class ArticlePageTag(TaggedItemBase):
 class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
-    body = RichTextField(blank=True,)
+    body = RichTextField(blank=True)
+    body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True)
     embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
     document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
@@ -181,7 +187,14 @@ class ArticlePage(Page):
             heading="Article information"
         ),
         FieldPanel('summary'),
-        FieldPanel('body'),
+        MultiFieldPanel(
+            [
+                FieldPanel('body'),
+                FieldPanel('body_sf'),
+            ],
+            heading="Body",
+            help_text = "!! In near future, body will be eliminated and body_sf will be renamed to 'body'"
+        ),
         MultiFieldPanel(
             [
                 FieldPanel('document'),
