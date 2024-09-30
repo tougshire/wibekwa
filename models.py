@@ -123,6 +123,7 @@ class ArticlePage(Page):
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
     document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
     show_doc_link = models.BooleanField("show doc link", default=True, help_text="Show the document link automatically.  One reason to set false would be you're already placing a link in the body")
+    show_gallery = models.BooleanField("show doc link", default=True, help_text="Show the gallery")
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
@@ -185,12 +186,7 @@ class ArticlePage(Page):
             heading="Article information"
         ),
         FieldPanel('summary'),
-        MultiFieldPanel(
-            [
-                FieldPanel('body_sf'),
-            ],
-            heading="Body",
-        ),
+        FieldPanel('body_sf'),
         MultiFieldPanel(
             [
                 FieldPanel('document'),
@@ -198,7 +194,12 @@ class ArticlePage(Page):
             ],
             heading="Document"
         ),
-        InlinePanel('gallery_images', label="Gallery images"),
+        MultiFieldPanel(
+            [
+                InlinePanel('gallery_images', label="Gallery images"),
+                FieldPanel('show_gallery'),
+            ]
+        ),
         MultiFieldPanel(
             [
                 FieldPanel('embed_url'),
