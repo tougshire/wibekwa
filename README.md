@@ -20,30 +20,37 @@ These instructions are written with the assumption that you're starting a new pr
 * add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS in settings/base.py
 
 * run the migrations again
+* run collectstatic
 
 ## Setting Up
 
 ### Wibekwa provides the ability to have a landing page other than the root page.  Webekwa also provides for a static tags index page, where you designate the included tags in the admin panel (aka a "featured" tag or to make use of hidden tags described below, "_personal", "_coding" etc).  The following instructions are a way to make use of those features
 
 * rename the automatically-created page
-    * In the admin panel, click "Pages", then the edit icon (a pencil) for the automatically created page (which may be "home" or "welcome or something like that)
-    * In the promote tab, rename the slug from "home" to "old-home"
-    * Publish the page
-* using the "add child page" action next to the word "Root", create a new article index page
-    * name it "articles"
-    * check the "for site menus" check box under the Promote tab
-    * Publish the page
-* from the root page, create a new article static tags index page
+    * in the admin panel, click "Pages", then the edit icon (a pencil) for the automatically created page (which may be "home" or "welcome or something like that)
+    * in the promote tab, rename the slug from "home" to "home-old".  If the title is "Home", rename it to "Home-Old"
+    * publish the page
+* create a new article index page
+    * using the "add child page" action next to the word "Root", create a new article index page
+    * name it "Articles"
+    * publish the page
+* create a new article static tags index page
+    * from the root page, create a new article static tags index page
     * name it "featured articles"
-    * under "tags included" enter "_personal,_coding"
-    * Publish the page
-* from root, create a new redirect page
+    * under "tags included" enter "_coding,_personal"
+    * publish the page
+* create a new redirect page
+    * from root, create a new redirect page
     * name it "Home"
     * for the target page, choose the featured articles page
-    * Publish the page
-* Move the featured articles page and the articles index page under the home page
-    * Do this each page from the page list by selecting the three dots next to the page title, then "move".  After moving each page, get back to the page list by clicking "Pages", then "Pages" next to the home icon
-* Click "Settings" then "Sites"
-* edit localhost and change the root page from the old home page to the new home page (which is the redirect page)
+    * publish the page
+* move the featured articles page and the articles index page under the home page
+    * from the page list under root, check the checkboxes next to Featured Articles and Articles
+    * click the "move" button
+    * click the three dots next to "Root" and "Choose another page"
+    * choose Home
+* make Home the root page for the default site
+    * click "Settings" then "Sites"
+    * edit localhost and change the root page from the old home page to the new home page (which is the redirect page)
 * You can now add new articles with the "Blog Pages" menu item.  If you tag the article with "_personal" or "_coding", it will show up on your home page
     * The underscores make the tags hidden so they won't be shown in the tag cloud.  This allows you to use tags for positioning on pages without cluttering up the list of tags that are displayed with the article. You can tag an article with both "_personal" and "personal" to designate a personal post that is on the featured posts page
