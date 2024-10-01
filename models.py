@@ -369,10 +369,9 @@ class ArticleStaticTagsIndexPage(Page):
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
     tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names - not separated by group")
     group_titles_string = models.CharField("group titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used for tag groups")
-    first_group_is_special = models.BooleanField("first group is special", default=False, help_text="If the first group is expected to be treated differetly from the others.  Implementation may vary by template app")
+    apply_special_formatting = models.IntegerField("apply special formatting", default=False, help_text="The group number up to which special formatting should be applied.  Implementation may vary by template app")
     show_body_in_index = models.IntegerField("show body instead of summary", default=0, help_text="The group number up to which articles will show the entire body instead of the summary")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
-    repeat_ArticlePages = models.BooleanField(default=True, help_text="If separated by tag, if ArticlePages that have multiple included tags should be repeated")
     show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the ArticlePages')
 
     content_panels = Page.content_panels + [
@@ -382,13 +381,16 @@ class ArticleStaticTagsIndexPage(Page):
         MultiFieldPanel(
             [
                 FieldPanel('included_tag_names_string'),
-                FieldPanel('tag_titles_string'),
-                FieldPanel('group_titles_string'),
-                FieldPanel('first_group_is_special'),
-                FieldPanel('separate_tag_groups'),
-                FieldPanel('repeat_ArticlePages'),
+                MultiFieldPanel([
+                    FieldPanel('tag_titles_string'),
+                    FieldPanel('group_titles_string'),
+                    FieldPanel('separate_tag_groups'),
+                ], heading="Tag Titles"),
                 FieldPanel('show_tag_titles'),
-                FieldPanel('show_body_in_index')
+                MultiFieldPanel([
+                    FieldPanel('show_body_in_index'),
+                    FieldPanel('apply_special_formatting'),
+                ],heading="First Groups")
             ]
         )
     ]
@@ -444,8 +446,7 @@ class ArticleStaticTagsIndexPage(Page):
         context['sidebars'] = sidebars
 
         context['article_page_groups'] = article_page_groups
-        context['show_tag_titles'] = self.show_tag_titles
-        context['first_group_is_special'] = self.first_group_is_special
+        # context['first_group_is_special'] = self.first_group_is_special
 
         return context
 
