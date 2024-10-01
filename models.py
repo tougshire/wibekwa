@@ -370,6 +370,7 @@ class ArticleStaticTagsIndexPage(Page):
     tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names - not separated by group")
     group_titles_string = models.CharField("group titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used for tag groups")
     first_group_is_special = models.BooleanField("first group is special", default=False, help_text="If the first group is expected to be treated differetly from the others.  Implementation may vary by template app")
+    show_body_in_index = models.IntegerField("show body instead of summary", default=0, help_text="The group number up to which articles will show the entire body instead of the summary")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
     repeat_ArticlePages = models.BooleanField(default=True, help_text="If separated by tag, if ArticlePages that have multiple included tags should be repeated")
     show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the ArticlePages')
@@ -386,7 +387,8 @@ class ArticleStaticTagsIndexPage(Page):
                 FieldPanel('first_group_is_special'),
                 FieldPanel('separate_tag_groups'),
                 FieldPanel('repeat_ArticlePages'),
-                FieldPanel('show_tag_titles')
+                FieldPanel('show_tag_titles'),
+                FieldPanel('show_body_in_index')
             ]
         )
     ]
