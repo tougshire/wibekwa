@@ -51,6 +51,6 @@ These instructions are written with the assumption that you're starting a new pr
     * choose Home
 * make Home the root page for the default site
     * click "Settings" then "Sites"
-    * edit localhost and change the root page from the old home page to the new home page (which is the redirect page)
+    * edit the default site, probably "localhost" unless you changed it, and change the root page from the old home page to the new home page (which is the redirect page)
 * You can now add new articles with the "Blog Pages" menu item.  If you tag the article with "_personal" or "_coding", it will show up on your home page
     * The underscores make the tags hidden so they won't be shown in the tag cloud.  This allows you to use tags for positioning on pages without cluttering up the list of tags that are displayed with the article. You can tag an article with both "_personal" and "personal" to designate a personal post that is on the featured posts page
