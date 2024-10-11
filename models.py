@@ -35,6 +35,19 @@ from wagtail.snippets.models import register_snippet
 
 from .blocks import BodyStreamBlock
 
+def get_sidebars(request):
+    sidebars = []
+    for sidebarpage in SidebarPage.objects.live().all():
+        sidebar = {"location":sidebarpage.location, "children":[]}
+        for childpage in sidebarpage.get_children():
+            child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
+            sidebar["children"].append(child)
+        sidebars.append(sidebar)
+    return sidebars
+
+
+
+
 class RedirectPage(Page):
 
     target_page = models.ForeignKey(
@@ -78,15 +91,7 @@ class ArticleIndexPage(Page):
 
         context['articlepages'] = ArticlePages
 
-        sidebars = []
-        for sidebarpage in SidebarPage.objects.live().all():
-            sidebar = {"location":sidebarpage.location, "children":[]}
-            for childpage in sidebarpage.get_children():
-                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
-
-                sidebar["children"].append(child)
-            sidebars.append(sidebar)
-        context['sidebars'] = sidebars
+        context['sidebars'] = get_sidebars(request)
 
         return context
 
@@ -151,15 +156,7 @@ class ArticlePage(Page):
                 context['embed_url'] = self.embed_url
                 context['embed_frame_style'] = self.embed_frame_style
 
-        sidebars = []
-        for sidebarpage in SidebarPage.objects.live().all():
-            sidebar = {"location":sidebarpage.location, "children":[]}
-            for childpage in sidebarpage.get_children():
-                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
-
-                sidebar["children"].append(child)
-            sidebars.append(sidebar)
-        context['sidebars'] = sidebars
+        context['sidebars'] = get_sidebars(request)
 
         return context
 
@@ -233,15 +230,7 @@ class FreeArticlePage(Page):
                 context['embed_url'] = self.embed_url
                 context['embed_frame_style'] = self.embed_frame_style
 
-        sidebars = []
-        for sidebarpage in SidebarPage.objects.live().all():
-            sidebar = {"location":sidebarpage.location, "children":[]}
-            for childpage in sidebarpage.get_children():
-                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
-
-                sidebar["children"].append(child)
-            sidebars.append(sidebar)
-        context['sidebars'] = sidebars
+        context['sidebars'] = get_sidebars[request]
 
         return context
 
@@ -277,9 +266,8 @@ class FreeArticlePage(Page):
 class SidebarArticlePage(Page):
 
     body = RichTextField(blank=True,)
-    embed_url = models.URLField("Embed Target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
-    embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
-
+    embed_url = models.URLField("embed target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    embed_frame_style = models.CharField("frame style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
     parent_page_types = ["SidebarPage"]
 
     def get_context(self, request):
@@ -435,15 +423,7 @@ class ArticleStaticTagsIndexPage(Page):
                 article_page_groups.append(new_article_page_group)
 
 
-        sidebars = []
-        for sidebarpage in SidebarPage.objects.live().all():
-            sidebar = {"location":sidebarpage.location, "children":[]}
-            for childpage in sidebarpage.get_children():
-                child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
-
-                sidebar["children"].append(child)
-            sidebars.append(sidebar)
-        context['sidebars'] = sidebars
+        context['sidebars'] = get_sidebars(request)
 
         context['article_page_groups'] = article_page_groups
         # context['first_group_is_special'] = self.first_group_is_special
