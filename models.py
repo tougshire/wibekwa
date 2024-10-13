@@ -134,6 +134,9 @@ class ArticlePage(Page):
 
     parent_page_types = ["ArticleIndexPage"]
 
+    class Meta:
+        verbose_name = "Article"
+
     def get_context(self, request):
         context=super().get_context(request)
         context['visible_tags']=[]
@@ -268,6 +271,7 @@ class SidebarArticlePage(Page):
     body = RichTextField(blank=True,)
     embed_url = models.URLField("embed target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("frame style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
+
     parent_page_types = ["SidebarPage"]
 
     def get_context(self, request):
