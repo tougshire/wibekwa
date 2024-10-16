@@ -27,6 +27,7 @@ def get_template_settings(context):
             "theme_color",
             "footer_text",
             "footer_text_separator",
+            "favicon",
     }
     if not template_settings:
         template_settings = {}

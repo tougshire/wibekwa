@@ -517,6 +517,12 @@ class SiteTemplateSettings(BaseSiteSetting):
         default=';',
         help_text="The character by which the footer text will be split into a list.  This is optional"
     )
+    favicon = models.CharField(
+        'path to favicon',
+        max_length=125,
+        blank=True,
+        help_text="The path to the favicon. If static, precede with 'static:' ex: static:images/favicon.ico",
+    )
 
     def __str__(self):
         return "Template Settings for " + self.site.__str__() if self.site is not None else "None"
