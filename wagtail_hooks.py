@@ -1,10 +1,12 @@
 from wagtail_modeladmin.options import ModelAdmin, modeladmin_register, hooks
 from wagtail.admin.viewsets.pages import PageListingViewSet
 from .models import ArticlePage, SidebarArticlePage
+from wagtail.admin.ui.tables import Column
 
 @hooks.register("register_icons")
 def register_icons(icons):
     return icons + ['wibekwa/article.svg']
+
 
 class ArticlePageListingViewSet(PageListingViewSet):
     icon = "article"
@@ -12,6 +14,9 @@ class ArticlePageListingViewSet(PageListingViewSet):
     menu_label = "Articles"
     add_to_admin_menu = True
     model = ArticlePage
+    columns = PageListingViewSet.columns + [Column("get_tags","Tags")]
+
+
 
 article_page_listing_viewset = ArticlePageListingViewSet("article_pages")
 @hooks.register("register_admin_viewset")

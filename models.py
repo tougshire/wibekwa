@@ -137,6 +137,10 @@ class ArticlePage(Page):
     class Meta:
         verbose_name = "Article"
 
+    def get_tags(self):
+        tag_list=[ tag.name for tag in self.tags.all().order_by("name") ]
+        return ",".join(tag_list)
+
     def get_context(self, request):
         context=super().get_context(request)
         context['visible_tags']=[]
