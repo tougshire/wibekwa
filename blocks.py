@@ -33,6 +33,17 @@ class ImageBlock(StructBlock):
         icon = "image"
         template = "wibekwa/blocks/image_block.html"
 
+class ExternalImageBlock(StructBlock):
+    url = URLBlock(required=True)
+    caption = CharBlock(required=False)
+    attribution = CharBlock(required=False)
+    alt = CharBlock(required=True)
+    link = URLBlock(required=False)
+
+    class Meta:
+        icon = "image"
+        template = "wibekwa/blocks/external_image_block.html"
+
 
 class HeadingBlock(StructBlock):
     heading_text = CharBlock(classname="title", required=True)
@@ -62,6 +73,7 @@ class BaseStreamBlock(StreamBlock):
     document_block = DocumentChooserBlock()
     quote_block = BlockQuoteBlock()
     image_block = ImageBlock()
+    external_image_block = ExternalImageBlock()
     embed_block = EmbedBlock(
         help_text="Insert a URL to embed. For example, https://www.youtube.com/watch?v=SGJFWirQ3ks",
         icon="media",
