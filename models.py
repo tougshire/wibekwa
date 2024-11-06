@@ -237,7 +237,7 @@ class FreeArticlePage(Page):
                 context['embed_url'] = self.embed_url
                 context['embed_frame_style'] = self.embed_frame_style
 
-        context['sidebars'] = get_sidebars[request]
+        context['sidebars'] = get_sidebars(request)
 
         return context
 
