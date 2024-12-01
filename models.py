@@ -15,8 +15,9 @@ from wagtail.admin.panels import (
     PageChooserPanel,
 
 )
-
-from wagtail.contrib.forms.models import AbstractEmailForm, AbstractFormField
+from wagtail.contrib.forms.utils import get_field_clean_name
+from wagtail.contrib.forms.forms import FormBuilder
+from wagtail.contrib.forms.models import AbstractForm, AbstractEmailForm, AbstractFormField,FORM_FIELD_CHOICES
 from wagtail.contrib.forms.panels import FormSubmissionsPanel
 
 from wagtail.contrib.settings.models import (
@@ -44,9 +45,6 @@ def get_sidebars(request):
             sidebar["children"].append(child)
         sidebars.append(sidebar)
     return sidebars
-
-
-
 
 class RedirectPage(Page):
 
@@ -86,8 +84,6 @@ class ArticleIndexPage(Page):
         ArticlePages = self.get_children().live().order_by('-first_published_at')
         if tag:
             ArticlePages = ArticlePage.objects.filter(tags__name=tag)
-        for article_page in ArticlePages:
-            print('tp249q729', article_page)
 
         context['articlepages'] = ArticlePages
 
@@ -365,7 +361,7 @@ class ArticleStaticTagsIndexPage(Page):
     included_tag_names_string = models.CharField("tags included", max_length=255, blank=True, help_text="A comma separated list of tags to be included in this page which can also be grouped - separate groups with semicolon")
     tag_titles_string = models.CharField("tag titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used instead of the tag names - not separated by group")
     group_titles_string = models.CharField("group titles", max_length=255, blank=True, help_text="A comma separated list of titles to be used for tag groups")
-    apply_special_formatting = models.IntegerField("apply special formatting", default=False, help_text="The group number up to which special formatting should be applied.  Implementation may vary by template app")
+    apply_special_formatting = models.IntegerField("apply special formatting", default=0, help_text="The group number up to which special formatting should be applied.  Implementation may vary by template app")
     show_body_in_index = models.IntegerField("show body instead of summary", default=0, help_text="The group number up to which articles will show the entire body instead of the summary")
     separate_tag_groups = models.BooleanField(default=True, help_text="If the ArticlePages should be separated by tag")
     show_tag_titles = models.BooleanField(default=True, help_text='If the tag name should be displayed as a title to accompany the ArticlePages')
@@ -538,24 +534,107 @@ class SiteTemplateSettings(BaseSiteSetting):
     class Meta():
         verbose_name_plural = "Template Settings"
 
-class FormField(AbstractFormField):
-    page = ParentalKey('FormPage', on_delete=models.CASCADE, related_name='form_fields')
+def clean_form(self):
+
+    honeypot_err = False
+
+    for field_name in self.honeypot_field_list:
+        field_data = self.cleaned_data.get(field_name)
+        if str(field_data) > '':
+            honeypot_err = True
+
+    if honeypot_err:
+        self.add_error(None, self.honeypot_error_message)
+
+    return self.cleaned_data
 
 class FormPage(AbstractEmailForm):
-    intro = RichTextField(blank=True)
-    thank_you_text = RichTextField(blank=True)
+
+    # h/t: https://github.com/octavenz/wagtail-snippets/blob/master/form-builder-field-validation.md for explanatin of get_form and use of the descriptor
+
+    def get_form(self, *args, **kwargs):
+
+        form = super().get_form(*args, **kwargs)
+        form.honeypot_error_message=self.honeypot_error_message
+
+        raw_honeypot_field_list = [ get_field_clean_name(field_label) for field_label in self.honeypot_field_names.split(',') ]
+        honeypot_field_list=[]
+
+        self.honeypot_show_intro=False
+
+        for field_name in raw_honeypot_field_list:
+            if field_name in form.fields:
+                honeypot_field_list.append(field_name)
+                self.honeypot_show_intro=True
+
+        form.honeypot_field_list = honeypot_field_list
+
+        form.clean = clean_form.__get__(form)
+
+        form.submission_class = self.get_submission_class()
+        form.submission_page = self
+
+        return form
+
+
+    template = "wibekwa/contact_page.html"
+    # This is the default path.
+    # If ignored, Wagtail adds _landing.html to your template name
+    landing_page_template = "wibekwa/contact_page_landing.html"
+
+    intro = RichTextField(blank=True, help_text="Enter something like a summary of the form's purpose or general instructions for filling it out. If your form contains honeypots, explain that the form has fields or a field which should be left blank")
+    thank_you_text = RichTextField(blank=True, help_text="Enter text to be shown after the form is submitted")
+
+    honeypot_field_names = models.CharField("honeypot", max_length=255, blank=True, help_text="The name or comma-separated list of names for the field or fields to be left blank by humans in order to trap bots. The field(s) should be single-line required=False")
+    honeypot_error_message = models.CharField("honeypot error message", max_length=255, blank=True, default="If you are a person, please read the notes and retry", help_text="The name or comma-separated list of names for the field or fields to be left blank by humans in order to trap bots. The field(s) should be single-line required=False")
+    honeypot_intro = RichTextField(blank=True, default="Note: This form has a field or fields which should be left unfilled. In order to trap automatic form fillers, these fields are not marked but a person should be able to figure out which those are", help_text="Explain to visitors that the form has a field or fields which humans should realize are to be left blank")
 
     content_panels = AbstractEmailForm.content_panels + [
-        FormSubmissionsPanel(),
         FieldPanel('intro'),
-        InlinePanel('form_fields', label="Form fields"),
+        InlinePanel('form_fields', label='Form Fields'),
         FieldPanel('thank_you_text'),
         MultiFieldPanel([
             FieldRowPanel([
-                FieldPanel('from_address'),
-                FieldPanel('to_address'),
+                FieldPanel('from_address', classname="col6"),
+                FieldPanel('to_address', classname="col6"),
             ]),
-            FieldPanel('subject'),
-        ], "Email"),
+            FieldPanel("subject"),
+        ], heading="Email Settings"),
+        MultiFieldPanel([
+            FieldPanel("honeypot_field_names"),
+            FieldPanel("honeypot_intro"),
+            FieldPanel("honeypot_error_message"),
+        ], heading="Honeypot")
     ]
 
+class FormField(AbstractFormField):
+
+    page = ParentalKey(FormPage, on_delete=models.CASCADE, related_name='form_fields')
+
+class ArticleCommentPage(Page):
+    date = models.DateField("Post date", default=datetime.date.today)
+    body = models.CharField(max_length=250, blank=True, help_text='The body of the comment')
+    commenter_display_name = models.CharField(max_length=250, blank=True, help_text='The body of the comment')
+    in_reply_to = models.ForeignKey("ArticleCommentPage", on_delete=models.SET_NULL,null=True,blank=True)
+
+    parent_page_types = ["ArticlePage"]
+
+    class Meta:
+        verbose_name = "Comment"
+
+    search_fields = Page.search_fields + [
+        index.SearchField('body'),
+        index.SearchField('commenter_display_name'),
+    ]
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel(
+            [
+                FieldPanel('date'),
+                FieldPanel('commenter_display_name', widget=forms.CheckboxSelectMultiple),
+            ],
+            heading="Article information"
+        ),
+        FieldPanel('body'),
+
+    ]
