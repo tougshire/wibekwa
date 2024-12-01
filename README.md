@@ -28,7 +28,7 @@ These instructions are written with the assumption that you're starting a new pr
 
 * rename the automatically-created page
     * in the admin panel, click "Pages", then the edit icon (a pencil) for the automatically created page (which may be "home" or "welcome or something like that)
-    * in the promote tab, rename the slug from "home" to "home-old".  If the title is "Home", rename it to "Home-Old"
+    * change the title to "Home-Old".  In the promote tab, rename the slug from "home" to "home-old".
     * publish the page
 * create a new article index page
     * using the "add child page" action next to the word "Root", create a new article index page
@@ -36,7 +36,7 @@ These instructions are written with the assumption that you're starting a new pr
     * publish the page
 * create a new article static tags index page
     * from the root page, create a new article static tags index page
-    * name it "featured articles"
+    * name it "Featured Articles"
     * under "tags included" enter "_coding,_personal"
     * publish the page
 * create a new redirect page
@@ -52,5 +52,5 @@ These instructions are written with the assumption that you're starting a new pr
 * make Home the root page for the default site
     * click "Settings" then "Sites"
     * edit the default site, probably "localhost" unless you changed it, and change the root page from the old home page to the new home page (which is the redirect page)
-* You can now add new articles with the "Blog Pages" menu item.  If you tag the article with "_personal" or "_coding", it will show up on your home page
+* You can now add new articles with the "Articles" menu item.  If you tag the article with "_personal" or "_coding", it will show up on your home page
     * The underscores make the tags hidden so they won't be shown in the tag cloud.  This allows you to use tags for positioning on pages without cluttering up the list of tags that are displayed with the article. You can tag an article with both "_personal" and "personal" to designate a personal post that is on the featured posts page
