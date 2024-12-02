@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wagtailcore', '0095_embed'),
+        ('wagtailcore', '0094_alter_page_locale'),
         ('wibekwa', '0016_alter_articlepage_body_sf_alter_freearticlepage_body'),
     ]
 
