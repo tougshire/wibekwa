@@ -129,6 +129,7 @@ class ArticlePage(Page):
     document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
     show_doc_link = models.BooleanField("show doc link", default=True, help_text="Show the document link automatically.  One reason to set false would be you're already placing a link in the body")
     show_gallery = models.BooleanField("show doc link", default=True, help_text="Show the gallery")
+    show_main_image = models.BooleanField("show main image", default=True, help_text="Show the first gallery image as the article's main image")
     authors = ParentalManyToManyField('wibekwa.Author', blank=True)
     tags = ClusterTaggableManager(through=ArticlePageTag, blank=True)
 
@@ -171,7 +172,8 @@ class ArticlePage(Page):
     def main_image(self):
         gallery_item = self.gallery_images.first()
         if gallery_item:
-            return gallery_item.image
+            return gallery_item
+#            return gallery_item.image
         else:
             return None
 
@@ -202,6 +204,7 @@ class ArticlePage(Page):
             [
                 InlinePanel('gallery_images', label="Gallery images"),
                 FieldPanel('show_gallery'),
+                FieldPanel('show_main_image'),
             ]
         ),
         MultiFieldPanel(
@@ -321,11 +324,11 @@ class ArticlePageGalleryImage(Orderable):
     image = models.ForeignKey(
         'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
     )
-    caption = models.CharField(blank=True, max_length=250)
+    alt_text = models.TextField("alt text", blank=True, max_length=250)
 
     panels = [
         FieldPanel('image'),
-        FieldPanel('caption'),
+        FieldPanel('alt_text'),
     ]
 
 
