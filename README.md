@@ -9,15 +9,17 @@ Wibekwa requires wibekwa_base, touglates and wagtail_modeladmin.  Touglates requ
 These instructions are written with the assumption that you're starting a new project
 
 * create a Wagtail project in accordance with [Wagtail's instructions](https://docs.wagtail.org/en/v6.2.1/getting_started/)
-    * note: regarding Django projects in general, if you want to add a [custom user model](https://docs.djangoproject.com/en/5.1/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project), it's best to do so before your first migration. If you do, put your AUTH_USER_MODEL and related parameters in settings/base.py
+    * note: regarding Django projects in general, if you want to add a [custom user model](https://docs.djangoproject.com/en/5.1/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project), it's best to do so before your first migration. If you do, put your AUTH_USER_MODEL and related parameters in your settings file
     * You can stop at the part about creating the basic blog, but if you're not familiar with Wagtail, continue with the tutorial. If you do, you should delete the blog folder and remove "blog" from installed apps before continuing with these instructions.
-* pip install [markdown](https://pypi.org/project/Markdown/)
+* pip install [wagtail-markdown](https://pypi.org/project/wagtail-markdown/)
 * pip install [wagtail_modeladmin](https://pypi.org/project/wagtail-modeladmin/)
 * git clone [https://github.com/tougshire/touglates](https://github.com/tougshire/touglates)
 * git clone [https://github.com/tougshire/wibekwa_base](https://github.com/tougshire/wibekwa_base)
 * git clone [https://github.com/tougshire/wibekwa](https://github.com/tougshire/wibekwa)
 * add "wagtail.contrib.settings" and "wagtail_modeladmin" to your installed apps (for neatness, add them below "wagtail.admin")
-* add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS in settings/base.py
+* add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS in your settings file
+* add "wagtailmarkdown" to INSTALLED_APPS in your settings file
+
 
 * run the migrations again
 * run collectstatic
@@ -54,3 +56,4 @@ These instructions are written with the assumption that you're starting a new pr
     * edit the default site, probably "localhost" unless you changed it, and change the root page from the old home page to the new home page (which is the redirect page)
 * You can now add new articles with the "Articles" menu item.  If you tag the article with "_personal" or "_coding", it will show up on your home page
     * The underscores make the tags hidden so they won't be shown in the tag cloud.  This allows you to use tags for positioning on pages without cluttering up the list of tags that are displayed with the article. You can tag an article with both "_personal" and "personal" to designate a personal post that is on the featured posts page
+

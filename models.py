@@ -34,6 +34,8 @@ from wagtail.models import Page, Orderable
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
+from wagtailmarkdown.fields import MarkdownField
+
 from .blocks import BodyStreamBlock
 
 def get_sidebars(request):
@@ -119,6 +121,7 @@ class ArticlePageTag(TaggedItemBase):
 class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
+    body_md = MarkdownField()
     body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True)
     embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
@@ -175,7 +178,9 @@ class ArticlePage(Page):
 
     search_fields = Page.search_fields + [
         index.SearchField('summary'),
+        index.SearchField('body_md'),
         index.SearchField('body_sf'),
+
     ]
 
     content_panels = Page.content_panels + [
@@ -188,6 +193,7 @@ class ArticlePage(Page):
             heading="Article information"
         ),
         FieldPanel('summary'),
+        FieldPanel('body_md'),
         FieldPanel('body_sf'),
         MultiFieldPanel(
             [
