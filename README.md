@@ -11,18 +11,26 @@ These instructions are written with the assumption that you're starting a new pr
 * create a Wagtail project in accordance with [Wagtail's instructions](https://docs.wagtail.org/en/v6.2.1/getting_started/)
     * note: regarding Django projects in general, if you want to add a [custom user model](https://docs.djangoproject.com/en/5.1/topics/auth/customizing/#using-a-custom-user-model-when-starting-a-project), it's best to do so before your first migration. If you do, put your AUTH_USER_MODEL and related parameters in your settings file
     * You can stop at the part about creating the basic blog, but if you're not familiar with Wagtail, continue with the tutorial. If you do, you should delete the blog folder and remove "blog" from installed apps before continuing with these instructions.
-* pip install [wagtail-markdown](https://pypi.org/project/wagtail-markdown/)
+* pip install* [wagtail-markdown](https://pypi.org/project/wagtail-markdown/)
 * pip install [wagtail_modeladmin](https://pypi.org/project/wagtail-modeladmin/)
 * git clone [https://github.com/tougshire/touglates](https://github.com/tougshire/touglates)
 * git clone [https://github.com/tougshire/wibekwa_base](https://github.com/tougshire/wibekwa_base)
 * git clone [https://github.com/tougshire/wibekwa](https://github.com/tougshire/wibekwa)
 * add "wagtail.contrib.settings" and "wagtail_modeladmin" to your installed apps (for neatness, add them below "wagtail.admin")
-* add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS in your settings file
-* add "wagtailmarkdown" to INSTALLED_APPS in your settings file
-
+* add "touglates", "wibekwa_base", and "wibekwa" to INSTALLED_APPS
+* add "wagtailmarkdown" to INSTALLED_APPS
+** Add the following to your settings:
+```
+WAGTAILMARKDOWN = {
+    "autodownload_fontawesome": True,
+    "extensions": ['extra'],
+}
+```
 
 * run the migrations again
 * run collectstatic
+
+\* or install by other means
 
 ## Setting Up
 
