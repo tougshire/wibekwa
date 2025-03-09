@@ -121,8 +121,8 @@ class ArticlePageTag(TaggedItemBase):
 class ArticlePage(Page):
     date = models.DateField("Post date", default=datetime.date.today)
     summary = models.CharField(max_length=250, blank=True, help_text='A summary to be displayed instead of the body for index views')
-    body_md = MarkdownField()
-    body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True)
+    body_sf = StreamField(BodyStreamBlock(), verbose_name="body", blank=True, use_json_field=True, help_text="The body of the article.  Press the + sign to create content.  Use 'Paragraph block' if you're not sure which type of block to use")
+    body_md = MarkdownField(blank=True, help_text="A alternative markdown version of the body both this and the main body will be displayed if both have content")
     embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
     document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
@@ -178,9 +178,8 @@ class ArticlePage(Page):
 
     search_fields = Page.search_fields + [
         index.SearchField('summary'),
-        index.SearchField('body_md'),
         index.SearchField('body_sf'),
-
+        index.SearchField('body_md'),
     ]
 
     content_panels = Page.content_panels + [
@@ -193,8 +192,8 @@ class ArticlePage(Page):
             heading="Article information"
         ),
         FieldPanel('summary'),
-        FieldPanel('body_md'),
         FieldPanel('body_sf'),
+        FieldPanel('body_md'),
         MultiFieldPanel(
             [
                 FieldPanel('document'),
