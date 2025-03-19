@@ -18,7 +18,8 @@ These instructions are written with the assumption that you're starting a new pr
     * "wagtail.contrib.settings"
 	* "wagtail_modeladmin"
     * "wagtailmarkdown"
-	* "touglates" 
+    * "wagtail.contrib.table_block",
+	* "touglates"
 	* "wibekwa_base"
 	* "wibekwa"
 * Add the following to your settings:
