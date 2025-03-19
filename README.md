@@ -4,7 +4,7 @@ Wibekwa is a blog app for Wagtail
 
 ## Important Note
 
-This project is in development and there may be breaking changes unil this note is removed
+This project is in development and there may be breaking changes until this note is removed
 
 ## Installation
 
