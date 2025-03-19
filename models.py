@@ -178,8 +178,8 @@ class ArticlePage(Page):
 
     search_fields = Page.search_fields + [
         index.SearchField('summary'),
-        index.SearchField('body_sf'),
         index.SearchField('body_md'),
+        index.SearchField('body_sf'),
     ]
 
     content_panels = Page.content_panels + [
@@ -192,8 +192,8 @@ class ArticlePage(Page):
             heading="Article information"
         ),
         FieldPanel('summary'),
-        FieldPanel('body_sf'),
         FieldPanel('body_md'),
+        FieldPanel('body_sf'),
         MultiFieldPanel(
             [
                 FieldPanel('document'),
