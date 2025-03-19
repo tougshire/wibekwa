@@ -2,6 +2,10 @@
 
 Wibekwa is a blog app for Wagtail
 
+## Important Note
+
+This project is in development and there may be breaking changes unil this note is removed
+
 ## Installation
 
 Wibekwa requires wibekwa_base, touglates and wagtail_modeladmin. If you're using a different template app than wibekwa_base, you can substitute that app
