@@ -43,7 +43,7 @@ def get_sidebars(request):
     for sidebarpage in SidebarPage.objects.live().all():
         sidebar = {"location":sidebarpage.location, "children":[]}
         for childpage in sidebarpage.get_children():
-            child={"title":childpage.title, "body":childpage.specific.body, "context": childpage.specific.get_context(request)}
+            child={"title":childpage.title, "body_md":childpage.specific.body_md, "body_rt":childpage.specific.body_rt, "context": childpage.specific.get_context(request)}
             sidebar["children"].append(child)
         sidebars.append(sidebar)
     return sidebars
@@ -220,7 +220,9 @@ class ArticlePage(Page):
 
 class FreeArticlePage(Page):
 
-    body = StreamField(BodyStreamBlock(), blank=True, use_json_field=True)
+    body_md = MarkdownField(blank=True, help_text="A markdown version of the body. Both this and the streamfield version body will be displayed if they have content")
+    body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True, help_text="A streamfield version of the body. Both this and the markdown version body will be displayed if they have content")
+
     embed_url = models.URLField("Embed Target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
 
@@ -257,12 +259,15 @@ class FreeArticlePage(Page):
             return None
 
     search_fields = Page.search_fields + [
-        index.SearchField('body'),
+        index.SearchField('body_md'),
+        index.SearchField('body_sf'),
     ]
 
     content_panels = Page.content_panels + [
 
-        FieldPanel('body'),
+        FieldPanel('body_md'),
+        FieldPanel('body_sf'),
+
         MultiFieldPanel(
             [
                 FieldPanel('embed_url'),
@@ -276,7 +281,8 @@ class FreeArticlePage(Page):
 
 class SidebarArticlePage(Page):
 
-    body = RichTextField(blank=True,)
+    body_md = MarkdownField(blank=True, help_text="A markdown version of the body. Both this and the richtext version body will be displayed if they have content")
+    body_rt = RichTextField(blank=True, help_text="A rich text version of the body. Both this and the markdown version body will be displayed if they have content")
     embed_url = models.URLField("embed target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("frame style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
 
@@ -302,12 +308,14 @@ class SidebarArticlePage(Page):
         return context
 
     search_fields = Page.search_fields + [
-        index.SearchField('body'),
+        index.SearchField('body_md'),
+        index.SearchField('body_rt'),
     ]
 
     content_panels = Page.content_panels + [
 
-        FieldPanel('body'),
+        FieldPanel('body_md'),
+        FieldPanel('body_rt'),
         MultiFieldPanel(
             [
                 FieldPanel('embed_url'),
