@@ -222,7 +222,7 @@ class FreeArticlePage(Page):
 
     date = models.DateField("Post date", default=datetime.date.today)
     body_md = MarkdownField(blank=True, help_text="A markdown version of the body. Both this and the streamfield version body will be displayed if they have content")
-    body = StreamField(BodyStreamBlock(), blank=True, use_json_field=True, help_text="A streamfield version of the body. Both this and the markdown version body will be displayed if they have content")
+    body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True, help_text="A streamfield version of the body. Both this and the markdown version body will be displayed if they have content")
     embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
     document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
@@ -264,7 +264,7 @@ class FreeArticlePage(Page):
 
     search_fields = Page.search_fields + [
         index.SearchField('body_md'),
-        index.SearchField('body'),
+        index.SearchField('body_sf'),
     ]
 
     content_panels = Page.content_panels + [
@@ -275,7 +275,7 @@ class FreeArticlePage(Page):
             heading="Article information"
         ),
         FieldPanel('body_md'),
-        FieldPanel('body'),
+        FieldPanel('body_sf'),
         MultiFieldPanel(
             [
                 FieldPanel('document'),
