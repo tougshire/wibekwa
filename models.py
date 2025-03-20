@@ -220,11 +220,18 @@ class ArticlePage(Page):
 
 class FreeArticlePage(Page):
 
+    date = models.DateField("Post date", default=datetime.date.today)
     body_md = MarkdownField(blank=True, help_text="A markdown version of the body. Both this and the streamfield version body will be displayed if they have content")
-    body_sf = StreamField(BodyStreamBlock(), blank=True, use_json_field=True, help_text="A streamfield version of the body. Both this and the markdown version body will be displayed if they have content")
-
-    embed_url = models.URLField("Embed Target URL", blank=True, max_length=765, help_text="For pages with an iFrame, the URL of the embedded contnet")
+    body = StreamField(BodyStreamBlock(), blank=True, use_json_field=True, help_text="A streamfield version of the body. Both this and the markdown version body will be displayed if they have content")
+    embed_url = models.URLField("Embed Target URL", max_length=765, blank=True, help_text="For pages with an iFrame, the URL of the embedded contnet")
     embed_frame_style = models.CharField("Frame Style", max_length=255, blank=True, default="width:90%; height:1600px;", help_text="For pages with an iFrame, styling for the frame")
+    document = models.ForeignKey(get_document_model(), null=True,blank=True,on_delete=models.SET_NULL,)
+    show_doc_link = models.BooleanField("show doc link", default=True, help_text="Show the document link automatically.  One reason to set false would be you're already placing a link in the body")
+    show_gallery = models.BooleanField("show doc link", default=True, help_text="Show the gallery")
+    show_main_image = models.BooleanField("show main image", default=True, help_text="Show the first gallery image as the article's main image")
+
+    class Meta:
+        verbose_name = "Free Article"
 
     def get_context(self, request):
         context=super().get_context(request)
@@ -247,27 +254,42 @@ class FreeArticlePage(Page):
 
         return context
 
-
-        return context
-
-
     def main_image(self):
         gallery_item = self.gallery_images.first()
         if gallery_item:
-            return gallery_item.image
+            return gallery_item
+#            return gallery_item.image
         else:
             return None
 
     search_fields = Page.search_fields + [
         index.SearchField('body_md'),
-        index.SearchField('body_sf'),
+        index.SearchField('body'),
     ]
 
     content_panels = Page.content_panels + [
-
+        MultiFieldPanel(
+            [
+                FieldPanel('date'),
+            ],
+            heading="Article information"
+        ),
         FieldPanel('body_md'),
-        FieldPanel('body_sf'),
-
+        FieldPanel('body'),
+        MultiFieldPanel(
+            [
+                FieldPanel('document'),
+                FieldPanel('show_doc_link'),
+            ],
+            heading="Document"
+        ),
+        MultiFieldPanel(
+            [
+                InlinePanel('gallery_images', label="Gallery images"),
+                FieldPanel('show_gallery'),
+                FieldPanel('show_main_image'),
+            ]
+        ),
         MultiFieldPanel(
             [
                 FieldPanel('embed_url'),
@@ -340,6 +362,18 @@ class ArticlePageGalleryImage(Orderable):
         FieldPanel('alt_text'),
     ]
 
+class FreeArticlePageGalleryImage(Orderable):
+    page = ParentalKey(
+        FreeArticlePage, on_delete=models.CASCADE, related_name='gallery_images')
+    image = models.ForeignKey(
+        'wagtailimages.Image', on_delete=models.CASCADE, related_name='+'
+    )
+    alt_text = models.TextField("alt text", blank=True, max_length=250)
+
+    panels = [
+        FieldPanel('image'),
+        FieldPanel('alt_text'),
+    ]
 
 @register_snippet
 class Author(models.Model):
